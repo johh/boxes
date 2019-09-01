@@ -4,6 +4,7 @@ import { vec2, vec3, vec4, mat4, mat3, mat2 } from 'gl-matrix';
 interface MaterialProps {
 	vertexShader: string;
 	fragmentShader: string;
+	attributeNames?: string[];
 }
 
 interface UniformList {
@@ -43,14 +44,22 @@ const createShader = ( gl: WebGLRenderingContext, src: string, frag: Boolean ) =
 export default class Material {
 	private vertexSrc: string;
 	private fragmentSrc: string;
+	private attributeNames: string[];
 	private program: WebGLProgram;
 	private uniforms: UniformReferenceList = {};
 	private uniformQueue: UniformList = {};
 
 
 	constructor( props: MaterialProps ) {
-		this.vertexSrc = props.vertexShader;
-		this.fragmentSrc = props.fragmentShader;
+		const {
+			vertexShader,
+			fragmentShader,
+			attributeNames = ['position'],
+		} = props;
+
+		this.vertexSrc = vertexShader;
+		this.fragmentSrc = fragmentShader;
+		this.attributeNames = attributeNames;
 	}
 
 
@@ -64,6 +73,10 @@ export default class Material {
 
 		gl.attachShader( this.program, vertexShader );
 		gl.attachShader( this.program, fragmentShader );
+
+		this.attributeNames.forEach( ( name, i ) => {
+			gl.bindAttribLocation( this.program, i, name );
+		});
 
 		gl.linkProgram( this.program );
 

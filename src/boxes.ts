@@ -1,5 +1,5 @@
 
-export const c = WebGLRenderingContext;
+export const enums = WebGLRenderingContext;
 
 
 export { default as Renderer } from './lib/Renderer';

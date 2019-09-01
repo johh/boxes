@@ -99,7 +99,9 @@ export default class Material {
 				let updateFunction;
 
 				if ( typeof value === 'number' ) {
-					updateFunction = gl.uniform1f;
+					updateFunction = ( value: number ) => {
+						gl.uniform1f( location, value );
+					};
 				} else if ( typeof value === 'object' && !( 'type' in value ) ) {
 					switch ( value.length ) {
 					case 2:

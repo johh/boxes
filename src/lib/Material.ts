@@ -5,6 +5,7 @@ interface MaterialProps {
 	vertexShader: string;
 	fragmentShader: string;
 	attributeNames?: string[];
+	uniforms?: UniformList;
 }
 
 interface UniformList {
@@ -55,11 +56,14 @@ export default class Material {
 			vertexShader,
 			fragmentShader,
 			attributeNames = ['position'],
+			uniforms,
 		} = props;
 
 		this.vertexSrc = vertexShader;
 		this.fragmentSrc = fragmentShader;
 		this.attributeNames = attributeNames;
+
+		if ( uniforms ) this.setUniforms( uniforms );
 	}
 
 

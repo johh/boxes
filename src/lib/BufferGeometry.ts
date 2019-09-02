@@ -6,12 +6,14 @@ interface BufferGeometryProps {
 	attributes?: number[][];
 }
 
+
 export default class BufferGeometry {
 	private verts: number[];
 	private attributes: number[][];
 	private bufferData: Float32Array;
 	private buffer: WebGLBuffer;
 	private mode: TriangleDrawMode;
+	private attributeSetupFunctions: Function[] = [];
 
 	constructor( props: BufferGeometryProps ) {
 		const {
@@ -24,6 +26,7 @@ export default class BufferGeometry {
 		this.mode = mode;
 		this.attributes = attributes;
 	}
+
 
 	private upload( gl: WebGLRenderingContext ) {
 		if ( this.buffer ) return this.buffer;
@@ -55,15 +58,27 @@ export default class BufferGeometry {
 		let offset = 0;
 
 		sizes.forEach( ( size, i ) => {
-			gl.enableVertexAttribArray( i );
-			gl.vertexAttribPointer( i, size, gl.FLOAT, false, 0, offset );
+			const _offset = offset;
+
+			this.attributeSetupFunctions.push( () => {
+				gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+				gl.enableVertexAttribArray( i );
+				gl.vertexAttribPointer( i, size, gl.FLOAT, false, 0, _offset );
+			});
 
 			offset += ( this.verts.length / 3 ) * size * 4;
 		});
 	}
 
+
+	private prepare() {
+		this.attributeSetupFunctions.forEach( f => f() );
+	}
+
+
 	draw( gl: WebGLRenderingContext ) {
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload( gl ) );
+		this.prepare();
 		gl.drawArrays( this.mode, 0, this.verts.length / 3 );
 	}
 }

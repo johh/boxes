@@ -19,7 +19,7 @@ interface UniformUpdateList {
 interface UniformReference {
 	location: WebGLUniformLocation;
 	updateFunction: Function;
-	lastValue: UniformValue;
+	value: UniformValue;
 }
 
 interface UniformReferenceList {
@@ -92,7 +92,7 @@ export default class Material {
 	}
 
 
-	private commitUniforms( gl: WebGLRenderingContext ) {
+	private ingestUniforms( gl: WebGLRenderingContext ) {
 		Object.keys( this.uniformQueue ).forEach( ( key ) => {
 			const value = this.uniformQueue[key];
 
@@ -143,14 +143,20 @@ export default class Material {
 				const reference: UniformReference = {
 					location,
 					updateFunction,
-					lastValue: value,
+					value,
 				};
 
 				this.uniforms[key] = reference;
 			}
 
-			this.uniforms[key].updateFunction( value );
-			this.uniforms[key].lastValue = value;
+			this.uniforms[key].value = value;
+		});
+	}
+
+
+	private prepare() {
+		Object.keys( this.uniforms ).forEach( ( key ) => {
+			this.uniforms[key].updateFunction( this.uniforms[key].value );
 		});
 	}
 
@@ -158,7 +164,8 @@ export default class Material {
 	use( gl: WebGLRenderingContext ) {
 		const program = this.compile( gl );
 		gl.useProgram( program );
-		this.commitUniforms( gl );
+		this.ingestUniforms( gl );
+		this.prepare();
 	}
 
 
@@ -176,7 +183,7 @@ export default class Material {
 
 	updateUniform( key: string, updateFunction: UpdateFunction ) {
 		if ( this.uniforms[key]) {
-			this.uniformQueue[key] = updateFunction( this.uniforms[key].lastValue );
+			this.uniformQueue[key] = updateFunction( this.uniforms[key].value );
 		} else if ( this.uniformQueue[key]) {
 			this.uniformQueue[key] = updateFunction( this.uniformQueue[key]);
 		}

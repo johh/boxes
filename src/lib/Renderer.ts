@@ -1,5 +1,4 @@
-import BufferGeometry from './BufferGeometry';
-import Material from './Material';
+import Scene from './Scene';
 
 interface RendererPops {
 	canvas: HTMLCanvasElement;
@@ -26,12 +25,13 @@ export default class Renderer {
 	}
 
 
-	render( geometry: BufferGeometry, material: Material ) {
-		this.gl.clearColor( .1, 0, .1, 1 );
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+	render( scene: Scene ) {
+	/* 	this.gl.clearColor( .1, 0, .1, 1 );
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT ); */
+		this.gl.enable( this.gl.DEPTH_TEST );
+		this.gl.enable( this.gl.BLEND );
 
-		material.use( this.gl );
-		geometry.draw( this.gl );
+		scene.render( this.gl );
 	}
 
 	private createDebugTexture() {

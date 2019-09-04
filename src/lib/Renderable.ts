@@ -30,7 +30,7 @@ export default class Renderable extends TransformNode {
 		this.depthTest = depthTest;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
-		this.material.setUniform( 'u_mModelView', mat4.create() );
+		this.material.setUniform( 'u_mView', mat4.create() );
 		this.material.setUniform( 'u_mProjection', mat4.create() );
 	}
 
@@ -39,6 +39,9 @@ export default class Renderable extends TransformNode {
 		// compute model matrix
 
 		this.material.updateUniform( 'u_mModel', ( m: mat4 ) => mat4.copy( m, this.worldMatrix ) );
+		this.material.updateUniform( 'u_mView', ( m: mat4 ) => mat4.copy( m, viewMatrix ) );
+		this.material.updateUniform( 'u_mProjection', ( m: mat4 ) => mat4.copy( m, projectionMatrix ) );
+
 
 		if ( !this.depthTest ) gl.disable( gl.DEPTH_TEST );
 		this.material.use( gl );

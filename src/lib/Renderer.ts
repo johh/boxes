@@ -1,4 +1,5 @@
 import Scene from './Scene';
+import { Camera } from './GenericCamera';
 
 interface RendererPops {
 	canvas: HTMLCanvasElement;
@@ -25,13 +26,15 @@ export default class Renderer {
 	}
 
 
-	render( scene: Scene ) {
+	render( scene: Scene, camera: Camera ) {
 	/* 	this.gl.clearColor( .1, 0, .1, 1 );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT ); */
+		camera.updateMatrices();
+
 		this.gl.enable( this.gl.DEPTH_TEST );
 		this.gl.enable( this.gl.BLEND );
 
-		scene.render( this.gl );
+		scene.render( this.gl, camera.viewMatrix, camera.projectionMatrix );
 	}
 
 	private createDebugTexture() {

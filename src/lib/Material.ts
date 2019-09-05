@@ -1,20 +1,29 @@
-import { UniformValue } from './UniformValue';
 import { vec2, vec3, vec4, mat4, mat3, mat2 } from 'gl-matrix';
 
+import { UniformValue } from './UniformValue';
+import {
+	vertexShader as defaultVertShader,
+	fragmentShader as defaultFragShader,
+} from './defaultShaders';
+
+
 interface MaterialProps {
-	vertexShader: string;
-	fragmentShader: string;
+	vertexShader?: string;
+	fragmentShader?: string;
 	attributeNames?: string[];
 	uniforms?: UniformList;
 }
+
 
 interface UniformList {
 	[key: string]: UniformValue;
 }
 
+
 interface UniformUpdateList {
 	[key: string]: UpdateFunction;
 }
+
 
 interface UniformReference {
 	location: WebGLUniformLocation;
@@ -22,9 +31,11 @@ interface UniformReference {
 	value: UniformValue;
 }
 
+
 interface UniformReferenceList {
 	[key: string]: UniformReference;
 }
+
 
 type UpdateFunction = ( previousValue: UniformValue ) => UniformValue;
 
@@ -49,13 +60,14 @@ export default class Material {
 	private program: WebGLProgram;
 	private uniforms: UniformReferenceList = {};
 	private uniformQueue: UniformList = {};
+	public readonly isMaterial = true;
 
 
 	constructor( props: MaterialProps ) {
 		const {
-			vertexShader,
-			fragmentShader,
-			attributeNames = ['position'],
+			vertexShader = defaultVertShader,
+			fragmentShader = defaultFragShader,
+			attributeNames = ['a_vPosition', 'a_vUv'],
 			uniforms,
 		} = props;
 
@@ -138,6 +150,13 @@ export default class Material {
 						};
 						break;
 					}
+				} else if ( typeof value === 'object' && ( 'type' in value ) ) {
+					switch ( value.type ) {
+					case 'int':
+						updateFunction = ( value: { value: number}) => {
+							gl.uniform1i( location, value.value );
+						};
+					}
 				}
 
 				const reference: UniformReference = {
@@ -161,7 +180,7 @@ export default class Material {
 	}
 
 
-	use( gl: WebGLRenderingContext ) {
+	public use( gl: WebGLRenderingContext ) {
 		const program = this.compile( gl );
 		gl.useProgram( program );
 		this.ingestUniforms( gl );
@@ -169,19 +188,19 @@ export default class Material {
 	}
 
 
-	setUniform( key: string, value: UniformValue, force: boolean = false ) {
+	public setUniform( key: string, value: UniformValue, force: boolean = false ) {
 		this.uniformQueue[key] = value;
 	}
 
 
-	setUniforms( list: UniformList ) {
+	public setUniforms( list: UniformList ) {
 		Object.keys( list ).forEach( ( key ) => {
 			this.uniformQueue[key] = list[key];
 		});
 	}
 
 
-	updateUniform( key: string, updateFunction: UpdateFunction ) {
+	public updateUniform( key: string, updateFunction: UpdateFunction ) {
 		if ( this.uniforms[key]) {
 			this.uniformQueue[key] = updateFunction( this.uniforms[key].value );
 		} else if ( this.uniformQueue[key]) {
@@ -190,7 +209,7 @@ export default class Material {
 	}
 
 
-	updateUniforms( list: UniformUpdateList ) {
+	public updateUniforms( list: UniformUpdateList ) {
 		Object.keys( list ).forEach( ( key ) => {
 			this.updateUniform( key, list[key]);
 		});

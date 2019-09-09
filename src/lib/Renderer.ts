@@ -9,6 +9,7 @@ interface RendererPops {
 	canvas: HTMLCanvasElement;
 	width?: number;
 	height?: number;
+	clearColor?: [number, number, number, number];
 }
 
 
@@ -17,6 +18,7 @@ export default class Renderer {
 	public canvas: HTMLCanvasElement;
 	public width: number;
 	public height: number;
+	public clearColor: [number, number, number, number];
 
 
 	constructor( props: RendererPops ) {
@@ -24,9 +26,11 @@ export default class Renderer {
 			canvas,
 			width = 800,
 			height = 600,
+			clearColor = [0, 0, 0, 1],
 		} = props;
 
 		this.gl = canvas.getContext( 'webgl' );
+		this.clearColor = <[number, number, number, number]>clearColor;
 
 		this.createDebugTexture();
 		this.setSize( width, height );
@@ -42,8 +46,8 @@ export default class Renderer {
 
 
 	public render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer ) {
-	/* 	this.gl.clearColor( .1, 0, .1, 1 );
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT ); */
+		this.gl.clearColor( ...this.clearColor );
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 		camera.updateMatrices();
 
 		this.gl.viewport( 0, 0, this.width, this.height );

@@ -19,9 +19,9 @@ type PostFxPipelineStep = Material | Framebuffer | { scene: Scene, camera: Came
 export default class PostFxPipeline {
 	private readonly tri = new BufferGeometry({
 		verts: [
-			-1, 1, 0,
-			3, 1, 0,
-			-1, -3, 0,
+			-1, -1, 0,
+			3, -1, 0,
+			-1, 3, 0,
 		],
 		attributes: [
 			[

@@ -32,7 +32,6 @@ export default class Renderer {
 		this.gl = canvas.getContext( 'webgl' );
 		this.clearColor = <[number, number, number, number]>clearColor;
 
-		this.createDebugTexture();
 		this.setSize( width, height );
 	}
 
@@ -76,39 +75,5 @@ export default class Renderer {
 
 		material.use( this.gl );
 		geometry.draw( this.gl );
-	}
-
-
-	private createDebugTexture() {
-		const texture = this.gl.createTexture();
-		this.gl.bindTexture( this.gl.TEXTURE_2D, texture );
-
-		this.gl.texImage2D(
-			this.gl.TEXTURE_2D,
-			0,
-			this.gl.RGBA,
-			2,
-			2,
-			0,
-			this.gl.RGBA,
-			this.gl.UNSIGNED_BYTE,
-			new Uint8Array([
-				1, 0, 1, 1,
-				0, 0, 0, 1,
-				0, 0, 0, 1,
-				1, 0, 1, 1,
-			].map( v => v * 255 ) ),
-		);
-
-		this.gl.texParameteri(
-			this.gl.TEXTURE_2D,
-			this.gl.TEXTURE_MIN_FILTER,
-			this.gl.NEAREST,
-		);
-		this.gl.texParameteri(
-			this.gl.TEXTURE_2D,
-			this.gl.TEXTURE_MAG_FILTER,
-			this.gl.NEAREST,
-		);
 	}
 }

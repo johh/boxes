@@ -14,4 +14,6 @@ export { default as PostFxPipeline } from './lib/post/PostFxPipeline';
 export { default as ShaderPass } from './lib/post/ShaderPass';
 export { default as Framebuffer } from './lib/post/Framebuffer';
 
+export { default as ImageTexture } from './lib/texture/ImageTexture';
+
 export { vec2, vec3, vec4, mat3, mat4 } from 'gl-matrix';

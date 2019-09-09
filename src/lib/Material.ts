@@ -5,6 +5,7 @@ import {
 	vertexShader as defaultVertShader,
 	fragmentShader as defaultFragShader,
 } from './defaultShaders';
+import GenericTexture, { Texture } from './texture/GenericTexture';
 
 
 interface MaterialProps {
@@ -60,6 +61,7 @@ export default class Material {
 	private program: WebGLProgram;
 	private uniforms: UniformReferenceList = {};
 	private uniformQueue: UniformList = {};
+	private textures: Texture[] = [];
 	public readonly isMaterial = true;
 
 
@@ -118,6 +120,19 @@ export default class Material {
 					updateFunction = ( value: number ) => {
 						gl.uniform1f( location, value );
 					};
+				} else if ( typeof value === 'object' && ( 'isTexture' in value ) ) {
+					let i: number = this.textures.indexOf( value );
+
+					if ( i === -1 ) {
+						this.textures.push( value );
+						i = this.textures.length - 1;
+					}
+
+					updateFunction = ( value: Texture ) => {
+						this.textures[i] = value;
+						gl.uniform1i( location, i );
+					};
+
 				} else if ( typeof value === 'object' && !( 'type' in value ) ) {
 					switch ( value.length ) {
 					case 2:
@@ -180,11 +195,22 @@ export default class Material {
 	}
 
 
+	private bindTextures( gl: WebGLRenderingContext ) {
+		this.textures.forEach( ( texture, i ) => {
+			const textureLoc = texture.prepare( gl );
+
+			gl.activeTexture( gl.TEXTURE0 + i );
+			gl.bindTexture( gl.TEXTURE_2D, textureLoc );
+		});
+	}
+
+
 	public use( gl: WebGLRenderingContext ) {
 		const program = this.compile( gl );
 		gl.useProgram( program );
 		this.ingestUniforms( gl );
 		this.prepare();
+		this.bindTextures( gl );
 	}
 
 

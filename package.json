@@ -1,11 +1,12 @@
 {
     "name": "@downpourdigital/boxes",
     "version": "0.0.0",
-    "description": "UI focussed WebGL library",
-    "main": "dist/boxes.js",
+    "description": "Tiny WebGL library",
+	"main": "dist/boxes.js",
+	"repository": "https://github.com/johh/boxes.git",
     "author": "johh <code@johh.net>",
     "license": "MIT",
-    "private": true,
+    "private": false,
     "scripts": {
         "build": "rollup -c",
         "declaration": "tsc --emitDeclarationOnly",
@@ -19,6 +20,7 @@
         "@babel/plugin-proposal-object-rest-spread": "^7.5.4",
         "@babel/preset-env": "^7.5.4",
         "@babel/preset-typescript": "^7.3.3",
+		"@types/gl-matrix": "^2.4.5",
         "babel-eslint": "^10.0.2",
         "eslint": "^6.0.1",
         "rollup": "^1.17.0",
@@ -30,7 +32,6 @@
         "typescript": "^3.5.3"
     },
     "dependencies": {
-        "@types/gl-matrix": "^2.4.5",
         "gl-matrix": "^3.1.0"
     }
 }

@@ -119,9 +119,9 @@ const obj1 = new Renderable({
 ```
 Inherits the transform properties from `TransformNode` and provides the following uniforms:
 
-* `u_mModel` – `mat4` – the model matrix
-* `u_mView` – `mat4` – the view matrix
-* `u_mProjection` – `mat4` – the projection matrix (provided by the camera)
+* `mat4 u_mModel` – the model matrix
+* `mat4 u_mView` – the view matrix
+* `mat4 u_mProjection` – the projection matrix (provided by the camera)
 
 
 
@@ -233,17 +233,17 @@ postFx.render([
 	fboA,				//	use fboA as input
 	shaderPassB,			//	apply a shaderpass
 	shaderPassA,			//	apply another shaderpass
-]);						//	since no fbo is provided as a last step,
-						//	it will render to screen.
+]);					//	since no fbo is provided as a last step,
+					//	it will render to screen.
 ```
 The following uniforms are provided by the ShaderPass:
 
-* `u_tDiffuse0` – `sampler2D` – output of previous pass
-* `u_fTime` – `float` – current time in ms
+* `sampler2D u_tDiffuse0` – output of previous pass
+* `float u_fTime` – current time in ms
 
 additionally, the following varyings are supplied:
 
-* `v_vUv` – `vec2` – the texture coordinates
+* `vec2 v_vUv` – the texture coordinates
 
 
 ### License

@@ -2,7 +2,7 @@ import Scene from './Scene';
 import { Camera } from './camera/GenericCamera';
 import BufferGeometry from './BufferGeometry';
 import Material from './Material';
-import Framebuffer from './Framebuffer';
+import Framebuffer from './post/Framebuffer';
 
 
 interface RendererPops {

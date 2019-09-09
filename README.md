@@ -1,6 +1,6 @@
 # 🎁📦📬 boxes
 
-Boxes is a tiny WebGL library built with `gl-matrix` and TypeScript. It only provides the most basic utilities and is very much **WORK IN PROGRESS** right now.
+Boxes is a tiny WebGL library built with [`gl-matrix`](http://glmatrix.net/) and TypeScript. It only provides the most basic utilities and is very much **WORK IN PROGRESS** right now.
 
 ### Installation
 
@@ -119,9 +119,9 @@ const obj1 = new Renderable({
 ```
 Inherits the transform properties from `TransformNode` and provides the following uniforms:
 
-* `u_mModel` mat4 – the model matrix
-* `u_mView` mat4 – the view matrix
-* `u_mProjection` mat4 – the projection matrix (provided by the camera)
+* `u_mModel` – `mat4` – the model matrix
+* `u_mView` – `mat4` – the view matrix
+* `u_mProjection` – `mat4` – the projection matrix (provided by the camera)
 
 
 
@@ -226,13 +226,25 @@ const fboA = new Framebuffer({
 postFx.render([
 	{ scene, camera },		//	first render a scene
 	shaderPassA,			//	apply a shaderpass
-	fboA,					//	render to fboA
+	fboA,				//	render to fboA
 ]);
 
 postFx.render([
-	fboA,					//	use fboA as input
+	fboA,				//	use fboA as input
 	shaderPassB,			//	apply a shaderpass
 	shaderPassA,			//	apply another shaderpass
-]);							//	since no fbo is provided as a last step,
-								it will render to screen.
+]);						//	since no fbo is provided as a last step,
+						//	it will render to screen.
 ```
+The following uniforms are provided by the ShaderPass:
+
+* `u_tDiffuse0` – `sampler2D` – output of previous pass
+* `u_fTime` – `float` – current time in ms
+
+additionally, the following varyings are supplied:
+
+* `v_vUv` – `vec2` – the texture coordinates
+
+
+### License
+© 2019 [DOWNPOUR DIGITAL](https://downpour.digital), licensed under BSD-4-Clause

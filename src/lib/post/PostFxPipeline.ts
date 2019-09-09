@@ -1,9 +1,9 @@
-import BufferGeometry from './BufferGeometry';
-import Renderer from './Renderer';
+import BufferGeometry from '../BufferGeometry';
+import Renderer from '../Renderer';
 import Framebuffer from './Framebuffer';
-import Material from './Material';
-import Scene from './Scene';
-import { Camera } from './GenericCamera';
+import Material from '../Material';
+import Scene from '../Scene';
+import { Camera } from '../camera/GenericCamera';
 
 
 interface PostFxPipelineProps {

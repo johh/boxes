@@ -1,5 +1,5 @@
-import Material from './Material';
-import { unprojectedVertexShader } from './defaultShaders';
+import Material from '../Material';
+import { unprojectedVertexShader } from '../defaultShaders';
 
 
 export default class ShaderPass extends Material {

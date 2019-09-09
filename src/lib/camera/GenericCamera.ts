@@ -1,6 +1,6 @@
 import { mat4, vec3 } from 'gl-matrix';
 
-import Transform from './Transform';
+import Transform from '../Transform';
 
 
 export default class GenericCamera extends Transform {

@@ -4,15 +4,20 @@ interface BufferGeometryProps {
 	verts: number[];
 	mode?: TriangleDrawMode;
 	attributes?: number[][];
+	indices?: number[];
+	components?: number;
 }
 
 
 export default class BufferGeometry {
-	private verts: number[];
-	private attributes: number[][];
-	private bufferData: Float32Array;
-	private buffer: WebGLBuffer;
-	private mode: TriangleDrawMode;
+	protected verts: number[];
+	protected attributes: number[][];
+	protected bufferData: Float32Array;
+	protected buffer: WebGLBuffer;
+	protected indices: Uint16Array;
+	protected indexBuffer: WebGLBuffer;
+	protected mode: TriangleDrawMode;
+	protected components: number;
 	private attributeSetupFunctions: Function[] = [];
 
 	constructor( props: BufferGeometryProps ) {
@@ -20,11 +25,16 @@ export default class BufferGeometry {
 			verts,
 			attributes = [],
 			mode = WebGLRenderingContext.TRIANGLES,
+			indices,
+			components = 3,
 		} = props;
 
 		this.verts = verts;
 		this.mode = mode;
+		this.components = components;
 		this.attributes = attributes;
+
+		if ( indices ) this.indices = new Uint16Array( indices );
 	}
 
 
@@ -33,15 +43,15 @@ export default class BufferGeometry {
 
 
 		let data = [].concat( this.verts );
-		const sizes: number[] = [3];
+		const sizes: number[] = [this.components];
 
 		this.attributes.forEach( ( attribute, i ) => {
-			let size = attribute.length / ( this.verts.length / 3 );
+			let size = attribute.length / ( this.verts.length / this.components );
 
 			if ( size % 1 !== 0 ) {
 				console.warn( `[WEBGL] Unsupported attribute size in slot ${i}, filling with zeroes` );
 				size = 1;
-				data = data.concat( Array( this.verts.length / 3 ).fill( 0 ) );
+				data = data.concat( Array( this.verts.length / this.components ).fill( 0 ) );
 			} else {
 				data = data.concat( attribute );
 			}
@@ -66,8 +76,19 @@ export default class BufferGeometry {
 				gl.vertexAttribPointer( i, size, gl.FLOAT, false, 0, _offset );
 			});
 
-			offset += ( this.verts.length / 3 ) * size * 4;
+			offset += ( this.verts.length / this.components ) * size * 4;
 		});
+
+
+		if ( this.indices ) {
+			this.indexBuffer = gl.createBuffer();
+			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );
+			gl.bufferData(
+				gl.ELEMENT_ARRAY_BUFFER,
+				this.indices,
+				gl.STATIC_DRAW,
+			);
+		}
 	}
 
 
@@ -79,6 +100,12 @@ export default class BufferGeometry {
 	draw( gl: WebGLRenderingContext ) {
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload( gl ) );
 		this.prepare();
-		gl.drawArrays( this.mode, 0, this.verts.length / 3 );
+
+		if ( this.indices ) {
+			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );
+			gl.drawElements( this.mode, this.indices.length, gl.UNSIGNED_SHORT, 0 );
+		} else {
+			gl.drawArrays( this.mode, 0, this.verts.length / this.components );
+		}
 	}
 }

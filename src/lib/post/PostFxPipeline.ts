@@ -10,6 +10,7 @@ interface PostFxPipelineProps {
 	renderer: Renderer;
 	width?: number;
 	height?: number;
+	depth?: boolean;
 }
 
 
@@ -41,6 +42,7 @@ export default class PostFxPipeline {
 			renderer,
 			width = renderer.width,
 			height = renderer.height,
+			depth = false,
 		} = props;
 
 		this.renderer = renderer;
@@ -49,14 +51,14 @@ export default class PostFxPipeline {
 			renderer,
 			width,
 			height,
-			depth: false,
+			depth,
 		});
 
 		this.fboB = new Framebuffer({
 			renderer,
 			width,
 			height,
-			depth: false,
+			depth,
 		});
 	}
 

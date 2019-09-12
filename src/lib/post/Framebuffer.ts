@@ -75,7 +75,7 @@ export default class Framebuffer {
 				this.gl.RENDERBUFFER,
 				this.gl.DEPTH_COMPONENT16,
 				this.width,
-				this.width,
+				this.height,
 			);
 			this.gl.framebufferRenderbuffer(
 				this.gl.FRAMEBUFFER,
@@ -95,6 +95,10 @@ export default class Framebuffer {
 
 	public clear() {
 		this.use();
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+		if ( this.depthBuffer ) {
+			this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
+		} else {
+			this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+		}
 	}
 }

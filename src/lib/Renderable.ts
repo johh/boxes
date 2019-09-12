@@ -8,6 +8,7 @@ interface RenderableProps {
 	geometry: BufferGeometry;
 	material: Material;
 	depthTest?: boolean;
+	depthWrite?: boolean;
 }
 
 export default class Renderable extends TransformNode {
@@ -15,6 +16,7 @@ export default class Renderable extends TransformNode {
 	public geometry: BufferGeometry;
 	public material: Material;
 	public depthTest: boolean;
+	public depthWrite: boolean;
 
 	constructor( props: RenderableProps ) {
 		super();
@@ -23,11 +25,13 @@ export default class Renderable extends TransformNode {
 			geometry,
 			material,
 			depthTest = true,
+			depthWrite = true,
 		} = props;
 
 		this.geometry = geometry;
 		this.material = material;
 		this.depthTest = depthTest;
+		this.depthWrite = depthWrite;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
 		this.material.setUniform( 'u_mView', mat4.create() );
@@ -44,8 +48,10 @@ export default class Renderable extends TransformNode {
 
 
 		if ( !this.depthTest ) gl.disable( gl.DEPTH_TEST );
+		if ( !this.depthWrite ) gl.depthMask( false );
 		this.material.use( gl );
 		this.geometry.draw( gl );
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
+		if ( !this.depthWrite ) gl.depthMask( true );
 	}
 }

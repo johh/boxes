@@ -9,6 +9,7 @@ interface RenderableProps {
 	material: Material;
 	depthTest?: boolean;
 	depthWrite?: boolean;
+	visible?: boolean;
 }
 
 export default class Renderable extends TransformNode {
@@ -17,6 +18,7 @@ export default class Renderable extends TransformNode {
 	public material: Material;
 	public depthTest: boolean;
 	public depthWrite: boolean;
+	public visible: boolean;
 
 	constructor( props: RenderableProps ) {
 		super();
@@ -26,12 +28,14 @@ export default class Renderable extends TransformNode {
 			material,
 			depthTest = true,
 			depthWrite = true,
+			visible = true,
 		} = props;
 
 		this.geometry = geometry;
 		this.material = material;
 		this.depthTest = depthTest;
 		this.depthWrite = depthWrite;
+		this.visible = visible;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
 		this.material.setUniform( 'u_mView', mat4.create() );

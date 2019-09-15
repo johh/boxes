@@ -24,9 +24,8 @@ export default class Scene implements Traversable {
 	static processNode(
 		gl: WebGLRenderingContext,
 		node: Renderable | TransformNode | Traversable,
+		renderQueue: Renderable[],
 		parentWorldMatrix: mat4,
-		viewMatrix: mat4,
-		projectiondMatrix: mat4,
 	) {
 		let worldMatrix: mat4;
 
@@ -37,12 +36,12 @@ export default class Scene implements Traversable {
 			worldMatrix = parentWorldMatrix;
 		}
 
-		if ( 'isRenderable' in node ) {
-			node.render( gl, viewMatrix, projectiondMatrix );
+		if ( 'isRenderable' in node && node.visible ) {
+			renderQueue.push( node );
 		}
 
 		node.children.forEach( ( child ) => {
-			Scene.processNode( gl, child, worldMatrix, viewMatrix, projectiondMatrix );
+			Scene.processNode( gl, child, renderQueue, worldMatrix );
 		});
 	}
 
@@ -50,8 +49,11 @@ export default class Scene implements Traversable {
 	render(
 		gl: WebGLRenderingContext,
 		viewMatrix: mat4,
-		projectiondMatrix: mat4,
+		projectionMatrix: mat4,
 	) {
-		Scene.processNode( gl, this, mat4.create(), viewMatrix, projectiondMatrix );
+		const renderQueue: Renderable[] = [];
+		Scene.processNode( gl, this, renderQueue, mat4.create() );
+
+		renderQueue.forEach( r => r.render( gl, viewMatrix, projectionMatrix ) );
 	}
 }

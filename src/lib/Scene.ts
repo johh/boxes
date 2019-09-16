@@ -1,10 +1,17 @@
+import { mat4 } from 'gl-matrix';
+
 import Traversable from './Traversable';
 import TransformNode from './TransformNode';
-import { mat4 } from 'gl-matrix';
 import Renderable from './Renderable';
+
+
+type RenderFunction = ( gl: WebGLRenderingContext ) => void;
+type RenderStep = Renderable | RenderFunction;
+
 
 export default class Scene implements Traversable {
 	public children: Traversable[] = [];
+	public visible: boolean = true;
 
 	append( child: Traversable ) {
 		if ( !this.children.includes( child ) ) {
@@ -21,10 +28,67 @@ export default class Scene implements Traversable {
 	}
 
 
-	static processNode(
+	static queueRenderables(
 		gl: WebGLRenderingContext,
 		node: Renderable | TransformNode | Traversable,
-		renderQueue: Renderable[],
+		renderQueue: RenderStep[],
+		queueMasks: boolean = false,
+	) {
+		const processChildren = () => {
+			node.children.forEach( ( child ) => {
+				Scene.queueRenderables( gl, child, renderQueue, queueMasks );
+			});
+		};
+
+		if ( node.visible ) {
+			if (
+				'isRenderable' in node
+			) {
+				if ( !node.maskOnly || queueMasks ) {
+					if ( node.mask ) {
+						renderQueue.push( ( gl ) => {
+							gl.clear( gl.STENCIL_BUFFER_BIT );
+							gl.stencilOp( gl.KEEP, gl.KEEP, gl.REPLACE );
+							gl.stencilFunc( gl.ALWAYS, 1, 0xff );
+							gl.stencilMask( 0xff );
+							gl.colorMask( false, false, false, false );
+							gl.depthMask( false );
+							gl.enable( gl.STENCIL_TEST );
+						});
+						Scene.queueRenderables( gl, node.mask, renderQueue, true );
+						renderQueue.push( ( gl ) => {
+							gl.stencilFunc( gl.EQUAL, 1, 0xff );
+							gl.stencilMask( 0x00 );
+							gl.colorMask( true, true, true, true );
+							gl.depthMask( true );
+
+						});
+						renderQueue.push( node );
+						renderQueue.push( ( gl ) => {
+							gl.stencilMask( -1 );
+							gl.disable( gl.STENCIL_TEST );
+						});
+					} else {
+						renderQueue.push( node );
+					}
+
+					processChildren();
+				}
+			}  else if (
+				'isTransformNode' in node
+			)  {
+				if ( !node.maskOnly || queueMasks ) {
+					processChildren();
+				}
+			} else {
+				processChildren();
+			}
+		}
+	}
+
+
+	static calculateTransforms(
+		node: Renderable | TransformNode | Traversable,
 		parentWorldMatrix: mat4,
 	) {
 		let worldMatrix: mat4;
@@ -32,16 +96,12 @@ export default class Scene implements Traversable {
 		if ( 'isTransformNode' in node ) {
 			node.updateMatrices( parentWorldMatrix );
 			worldMatrix = node.worldMatrix;
-		} else {
+		} else {
 			worldMatrix = parentWorldMatrix;
 		}
 
-		if ( 'isRenderable' in node && node.visible ) {
-			renderQueue.push( node );
-		}
-
 		node.children.forEach( ( child ) => {
-			Scene.processNode( gl, child, renderQueue, worldMatrix );
+			Scene.calculateTransforms( child, worldMatrix );
 		});
 	}
 
@@ -51,9 +111,16 @@ export default class Scene implements Traversable {
 		viewMatrix: mat4,
 		projectionMatrix: mat4,
 	) {
-		const renderQueue: Renderable[] = [];
-		Scene.processNode( gl, this, renderQueue, mat4.create() );
+		const renderQueue: RenderStep[] = [];
+		Scene.calculateTransforms( this, mat4.create() );
+		Scene.queueRenderables( gl, this, renderQueue );
 
-		renderQueue.forEach( r => r.render( gl, viewMatrix, projectionMatrix ) );
+		renderQueue.forEach( ( step ) => {
+			if ( typeof step === 'function' ) {
+				step( gl );
+			} else {
+				step.render( gl, viewMatrix, projectionMatrix );
+			}
+		});
 	}
 }

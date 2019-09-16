@@ -2,14 +2,15 @@ import { mat4 } from 'gl-matrix';
 
 import BufferGeometry from './BufferGeometry';
 import Material from './Material';
-import TransformNode from './TransformNode';
+import TransformNode, { TransformNodeProps } from './TransformNode';
+import Traversable from './Traversable';
 
-interface RenderableProps {
+interface RenderableProps extends TransformNodeProps {
 	geometry: BufferGeometry;
 	material: Material;
 	depthTest?: boolean;
 	depthWrite?: boolean;
-	visible?: boolean;
+	mask?: Traversable;
 }
 
 export default class Renderable extends TransformNode {
@@ -18,24 +19,24 @@ export default class Renderable extends TransformNode {
 	public material: Material;
 	public depthTest: boolean;
 	public depthWrite: boolean;
-	public visible: boolean;
+	public mask: Traversable;
 
 	constructor( props: RenderableProps ) {
-		super();
+		super( props );
 
 		const {
 			geometry,
 			material,
+			mask,
 			depthTest = true,
 			depthWrite = true,
-			visible = true,
 		} = props;
 
 		this.geometry = geometry;
 		this.material = material;
 		this.depthTest = depthTest;
 		this.depthWrite = depthWrite;
-		this.visible = visible;
+		this.mask = mask;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
 		this.material.setUniform( 'u_mView', mat4.create() );

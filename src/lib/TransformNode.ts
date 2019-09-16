@@ -3,12 +3,14 @@ import Traversable from './Traversable';
 
 export interface TransformNodeProps {
 	visible?: boolean;
+	maskOnly?: boolean;
 }
 
 export default class TransformNode extends Transform implements Traversable {
 	public children: Traversable[] = [];
 	public parent: Traversable;
 	public visible: boolean;
+	public maskOnly: boolean;
 	public readonly isTransformNode = true;
 
 	constructor( props: TransformNodeProps = {}) {
@@ -16,9 +18,11 @@ export default class TransformNode extends Transform implements Traversable {
 
 		const {
 			visible = true,
+			maskOnly = false,
 		} = props;
 
 		this.visible = visible;
+		this.maskOnly = maskOnly;
 	}
 
 	append( child: Traversable ) {

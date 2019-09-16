@@ -29,7 +29,7 @@ export default class Renderer {
 			clearColor = [0, 0, 0, 1],
 		} = props;
 
-		this.gl = canvas.getContext( 'webgl' );
+		this.gl = canvas.getContext( 'webgl', { stencil: true });
 		this.clearColor = <[number, number, number, number]>clearColor;
 
 		this.setSize( width, height );

@@ -106,7 +106,7 @@ export default class Framebuffer {
 				this.gl.FRAMEBUFFER,
 				this.gl.STENCIL_ATTACHMENT,
 				this.gl.RENDERBUFFER,
-				this.depthBuffer,
+				this.stencilBuffer,
 			);
 		}
 
@@ -122,7 +122,7 @@ export default class Framebuffer {
 				this.gl.FRAMEBUFFER,
 				this.gl.DEPTH_STENCIL_ATTACHMENT,
 				this.gl.RENDERBUFFER,
-				this.depthBuffer,
+				this.depthStencilBuffer,
 			);
 		}
 	}

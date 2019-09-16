@@ -1,6 +1,6 @@
 {
     "name": "@downpourdigital/boxes",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Tiny WebGL library",
     "main": "dist/boxes.js",
     "repository": "https://github.com/johh/boxes.git",

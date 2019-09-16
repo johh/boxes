@@ -6,6 +6,7 @@ interface FramebufferProps {
 	width?: number;
 	height?: number;
 	depth?: boolean;
+	stencil?: boolean;
 }
 
 
@@ -13,6 +14,8 @@ export default class Framebuffer {
 	private gl: WebGLRenderingContext;
 	private fbo: WebGLFramebuffer;
 	private depthBuffer: WebGLRenderbuffer;
+	private stencilBuffer: WebGLRenderbuffer;
+	private depthStencilBuffer: WebGLRenderbuffer;
 	public texture: WebGLTexture;
 	public height: number;
 	public width: number;
@@ -25,13 +28,19 @@ export default class Framebuffer {
 			width = renderer.width,
 			height = renderer.height,
 			depth = false,
+			stencil= false,
 		} = props;
 
 		this.gl = renderer.gl;
 		this.fbo = this.gl.createFramebuffer();
 		this.texture = this.gl.createTexture();
 
-		if ( depth ) this.depthBuffer = this.gl.createRenderbuffer();
+		if ( depth && stencil ) {
+			this.depthStencilBuffer = this.gl.createRenderbuffer();
+		}else {
+			if ( depth ) this.depthBuffer = this.gl.createRenderbuffer();
+			if ( stencil ) this.stencilBuffer = this.gl.createRenderbuffer();
+		}
 
 		this.setSize( width, height );
 	}
@@ -84,6 +93,38 @@ export default class Framebuffer {
 				this.depthBuffer,
 			);
 		}
+
+		if ( this.stencilBuffer ) {
+			this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, this.stencilBuffer );
+			this.gl.renderbufferStorage(
+				this.gl.RENDERBUFFER,
+				this.gl.STENCIL_INDEX8,
+				this.width,
+				this.height,
+			);
+			this.gl.framebufferRenderbuffer(
+				this.gl.FRAMEBUFFER,
+				this.gl.STENCIL_ATTACHMENT,
+				this.gl.RENDERBUFFER,
+				this.depthBuffer,
+			);
+		}
+
+		if ( this.depthStencilBuffer ) {
+			this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, this.depthStencilBuffer );
+			this.gl.renderbufferStorage(
+				this.gl.RENDERBUFFER,
+				this.gl.DEPTH_STENCIL,
+				this.width,
+				this.height,
+			);
+			this.gl.framebufferRenderbuffer(
+				this.gl.FRAMEBUFFER,
+				this.gl.DEPTH_STENCIL_ATTACHMENT,
+				this.gl.RENDERBUFFER,
+				this.depthBuffer,
+			);
+		}
 	}
 
 
@@ -95,10 +136,11 @@ export default class Framebuffer {
 
 	public clear() {
 		this.use();
-		if ( this.depthBuffer ) {
-			this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
-		} else {
-			this.gl.clear( this.gl.COLOR_BUFFER_BIT );
-		}
+
+		let bitMask = this.gl.COLOR_BUFFER_BIT;
+		if ( this.depthBuffer || this.depthStencilBuffer ) bitMask |= this.gl.DEPTH_BUFFER_BIT;
+		if ( this.stencilBuffer || this.depthStencilBuffer ) bitMask |= this.gl.STENCIL_BUFFER_BIT;
+
+		this.gl.clear( bitMask );
 	}
 }

@@ -1,6 +1,6 @@
 # 🎁📦📬 boxes
 
-Boxes is a tiny WebGL library built with [`gl-matrix`](http://glmatrix.net/) and TypeScript. It only provides the most basic utilities and is very much **WORK IN PROGRESS** right now.
+boxes is a tiny WebGL library built with [`gl-matrix`](http://glmatrix.net/) and TypeScript. It only provides the most basic utilities and is very much **WORK IN PROGRESS** right now.
 
 ### Installation
 
@@ -101,6 +101,8 @@ const geometry = new BufferGeometry({
 			1, 0,
 		],
 	],
+	indices: [], // indices for indexed geometries
+	components: 3, // number of components in each vertex
 });
 
 ```
@@ -114,6 +116,10 @@ const obj1 = new Renderable({
 	geometry: new BufferGeometry(...),
 	material: new Material(...),
 	depthTest: true,
+	depthWrite: true,
+	visible: true,
+	maskOnly: false,
+	mask: new Renderable(...),
 });
 
 ```
@@ -129,7 +135,10 @@ Inherits the transform properties from `TransformNode` and provides the followin
 ```typescript
 import { TransformNode, vec3 } from '@downpourdigital/boxes';
 
-const group = new TransformNode();
+const group = new TransformNode({
+	visible: true,
+	maskOnly: false,
+});
 group.append( child ); // append renderable or another transform node
 group.remove( child );
 
@@ -210,6 +219,8 @@ const postFx = new PostFxPipeline({
 	renderer,
 	width: 800,
 	height: 600,
+	depth: false,
+	stencil: false,
 });
 
 const shaderPassA = new ShaderPass('frag shader here');
@@ -220,6 +231,7 @@ const fboA = new Framebuffer({
 	width: 400,
 	height: 300,
 	depth: false,
+	stencil: false,
 });
 
 

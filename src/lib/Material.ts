@@ -65,7 +65,7 @@ export default class Material {
 	public readonly isMaterial = true;
 
 
-	constructor( props: MaterialProps ) {
+	constructor( props: MaterialProps = {}) {
 		const {
 			vertexShader = defaultVertShader,
 			fragmentShader = defaultFragShader,

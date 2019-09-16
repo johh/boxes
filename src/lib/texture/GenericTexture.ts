@@ -30,7 +30,7 @@ export default class GenericTexture implements Texture {
 	public readonly isTexture = true;
 
 
-	constructor( props: GenericTextureProps ) {
+	constructor( props: GenericTextureProps = {}) {
 		const {
 			format = WebGLRenderingContext.RGBA,
 			type =  WebGLRenderingContext.UNSIGNED_BYTE,

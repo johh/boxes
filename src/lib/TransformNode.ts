@@ -1,11 +1,25 @@
 import Transform from './Transform';
 import Traversable from './Traversable';
 
+export interface TransformNodeProps {
+	visible?: boolean;
+}
 
 export default class TransformNode extends Transform implements Traversable {
 	public children: Traversable[] = [];
 	public parent: Traversable;
+	public visible: boolean;
 	public readonly isTransformNode = true;
+
+	constructor( props: TransformNodeProps = {}) {
+		super();
+
+		const {
+			visible = true,
+		} = props;
+
+		this.visible = visible;
+	}
 
 	append( child: Traversable ) {
 		if ( !this.children.includes( child ) ) {

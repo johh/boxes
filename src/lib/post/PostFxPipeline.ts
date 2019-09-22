@@ -15,7 +15,30 @@ interface PostFxPipelineProps {
 }
 
 
-type PostFxPipelineStep = Material | Framebuffer | { scene: Scene, camera: Camera };
+type PostFxPipelineStep =
+	Material |
+	Framebuffer |
+	Framebuffer[] |
+	{ scene: Scene, camera: Camera };
+
+
+const getFramebufferFromPipelineStep = ( step: PostFxPipelineStep, multiple: boolean = false ) => {
+	if ( 'isFramebuffer' in step ) {
+		return multiple ? <Framebuffer[]>[step] : <Framebuffer>step;
+	}
+	if (
+		Array.isArray( step )
+		&& ( <Framebuffer[]>step ).length > 0
+	) {
+		if ( multiple ) {
+			return <Framebuffer[]>step;
+		}
+
+		if ( 'isFramebuffer' in ( <Framebuffer[]>step )[0]) {
+			return ( <Framebuffer[]>step )[0];
+		}
+	}
+};
 
 
 export default class PostFxPipeline {
@@ -78,18 +101,29 @@ export default class PostFxPipeline {
 
 	public render( list: PostFxPipelineStep[]) {
 		list.forEach( ( step, i ) => {
-			const readBuffer = ( list[i - 1] && 'isFramebuffer' in list[i - 1])
-				? <Framebuffer>list[i - 1]
-				: this.fboA;
+			let readBuffers: Framebuffer[] = [this.fboA];
 
-			const writeBuffer = ( list[i + 1])
-				? ( 'isFramebuffer' in list[i + 1]) ? <Framebuffer>list[i + 1] : this.fboB
-				: undefined;
+			if ( list[i - 1]) {
+				const candidate = getFramebufferFromPipelineStep( list[i - 1], true );
+				if ( candidate ) {
+					readBuffers = <Framebuffer[]>candidate;
+				}
+			}
+
+			let writeBuffer: Framebuffer = null;
+
+			if ( list[i + 1]) {
+				const candidate = getFramebufferFromPipelineStep( list[i + 1]);
+				writeBuffer = <Framebuffer>candidate || this.fboB;
+			}
 
 			if ( 'isMaterial' in step ) {
-				this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE1 );
-				this.renderer.gl.bindTexture( this.renderer.gl.TEXTURE_2D, readBuffer.texture );
-				step.setUniform( 'u_tDiffuse0', { type: 'int', value: 1 });
+				readBuffers.forEach( ( buffer, i ) => {
+					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE1 + i );
+					this.renderer.gl.bindTexture( this.renderer.gl.TEXTURE_2D, buffer.texture );
+					step.setUniform( `u_tDiffuse${i}`, { type: 'int', value: 1 + i });
+				});
+
 				step.setUniform( 'u_fTime', performance.now() );
 
 				this.renderer.renderDirect( this.tri, step, writeBuffer );

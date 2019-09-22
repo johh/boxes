@@ -1,3 +1,6 @@
+import { enums } from '../../boxes';
+
+
 type TextureFormat =
 	WebGLRenderingContext['RGB'] |
 	WebGLRenderingContext['RGBA'] |
@@ -13,10 +16,18 @@ type TextureType =
 	WebGLRenderingContext['UNSIGNED_SHORT_5_5_5_1'];
 
 
+type WrappingType =
+	WebGLRenderingContext['CLAMP_TO_EDGE'] |
+	WebGLRenderingContext['REPEAT'] |
+	WebGLRenderingContext['MIRRORED_REPEAT'];
+
+
 export interface GenericTextureProps {
 	format?: TextureFormat;
 	type?: TextureType;
 	mipmaps?: boolean;
+	wrapS?: WrappingType;
+	wrapT?: WrappingType;
 }
 
 
@@ -25,6 +36,8 @@ export default class GenericTexture implements Texture {
 	private format: TextureFormat;
 	private type: TextureType;
 	private mipmaps: boolean;
+	private wrapS: WrappingType;
+	private wrapT: WrappingType;
 	private textureData: TexImageSource;
 	protected needsUpdate: boolean = false;
 	public readonly isTexture = true;
@@ -35,11 +48,15 @@ export default class GenericTexture implements Texture {
 			format = WebGLRenderingContext.RGBA,
 			type =  WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = false,
+			wrapS = enums.CLAMP_TO_EDGE,
+			wrapT = enums.CLAMP_TO_EDGE,
 		} = props;
 
 		this.format = format;
 		this.type = type;
 		this.mipmaps = mipmaps;
+		this.wrapS = wrapS;
+		this.wrapT = wrapT;
 	}
 
 
@@ -74,8 +91,8 @@ export default class GenericTexture implements Texture {
 				this.type,
 				data,
 			);
-			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
-			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS );
+			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT );
 
 			if ( this.mipmaps ) {
 				gl.generateMipmap( gl.TEXTURE_2D );

@@ -5,13 +5,19 @@ import Material from './Material';
 import TransformNode, { TransformNodeProps } from './TransformNode';
 import Traversable from './Traversable';
 
+
+type BlendType = 'normal' | 'additive';
+
+
 interface RenderableProps extends TransformNodeProps {
 	geometry: BufferGeometry;
 	material: Material;
 	depthTest?: boolean;
 	depthWrite?: boolean;
 	mask?: Traversable;
+	blending?: BlendType;
 }
+
 
 export default class Renderable extends TransformNode {
 	public readonly isRenderable = true;
@@ -20,6 +26,8 @@ export default class Renderable extends TransformNode {
 	public depthTest: boolean;
 	public depthWrite: boolean;
 	public mask: Traversable;
+	public blending: BlendType;
+
 
 	constructor( props: RenderableProps ) {
 		super( props );
@@ -30,6 +38,7 @@ export default class Renderable extends TransformNode {
 			mask,
 			depthTest = true,
 			depthWrite = true,
+			blending = 'normal',
 		} = props;
 
 		this.geometry = geometry;
@@ -37,6 +46,7 @@ export default class Renderable extends TransformNode {
 		this.depthTest = depthTest;
 		this.depthWrite = depthWrite;
 		this.mask = mask;
+		this.blending = blending;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
 		this.material.setUniform( 'u_mView', mat4.create() );
@@ -45,8 +55,6 @@ export default class Renderable extends TransformNode {
 
 
 	render( gl: WebGLRenderingContext, viewMatrix: mat4, projectionMatrix: mat4 ) {
-		// compute model matrix
-
 		this.material.updateUniform( 'u_mModel', ( m: mat4 ) => mat4.copy( m, this.worldMatrix ) );
 		this.material.updateUniform( 'u_mView', ( m: mat4 ) => mat4.copy( m, viewMatrix ) );
 		this.material.updateUniform( 'u_mProjection', ( m: mat4 ) => mat4.copy( m, projectionMatrix ) );
@@ -54,8 +62,20 @@ export default class Renderable extends TransformNode {
 
 		if ( !this.depthTest ) gl.disable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( false );
+
+		switch ( this.blending ) {
+		case 'additive':
+			gl.blendFunc( gl.ONE, gl.ONE );
+			break;
+
+		default:
+			gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+			break;
+		}
+
 		this.material.use( gl );
 		this.geometry.draw( gl );
+
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( true );
 	}

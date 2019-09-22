@@ -59,7 +59,6 @@ export default class Renderer {
 
 		this.gl.enable( this.gl.DEPTH_TEST );
 		this.gl.enable( this.gl.BLEND );
-		this.gl.blendFunc( this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA );
 
 		scene.render( this.gl, camera.viewMatrix, camera.projectionMatrix );
 	}

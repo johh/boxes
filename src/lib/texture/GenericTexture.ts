@@ -1,6 +1,3 @@
-import { enums } from '../../boxes';
-
-
 type TextureFormat =
 	WebGLRenderingContext['RGB'] |
 	WebGLRenderingContext['RGBA'] |
@@ -48,8 +45,8 @@ export default class GenericTexture implements Texture {
 			format = WebGLRenderingContext.RGBA,
 			type =  WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = false,
-			wrapS = enums.CLAMP_TO_EDGE,
-			wrapT = enums.CLAMP_TO_EDGE,
+			wrapS = WebGLRenderingContext.CLAMP_TO_EDGE,
+			wrapT = WebGLRenderingContext.CLAMP_TO_EDGE,
 		} = props;
 
 		this.format = format;

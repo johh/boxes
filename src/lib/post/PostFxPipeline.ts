@@ -135,4 +135,10 @@ export default class PostFxPipeline {
 			}
 		});
 	}
+
+
+	public delete() {
+		this.fboA.delete();
+		this.fboB.delete();
+	}
 }

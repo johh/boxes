@@ -54,7 +54,7 @@ export default class Renderable extends TransformNode {
 	}
 
 
-	render( gl: WebGLRenderingContext, viewMatrix: mat4, projectionMatrix: mat4 ) {
+	public render( gl: WebGLRenderingContext, viewMatrix: mat4, projectionMatrix: mat4 ) {
 		this.material.updateUniform( 'u_mModel', ( m: mat4 ) => mat4.copy( m, this.worldMatrix ) );
 		this.material.updateUniform( 'u_mView', ( m: mat4 ) => mat4.copy( m, viewMatrix ) );
 		this.material.updateUniform( 'u_mProjection', ( m: mat4 ) => mat4.copy( m, projectionMatrix ) );
@@ -78,5 +78,11 @@ export default class Renderable extends TransformNode {
 
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( true );
+	}
+
+
+	public delete() {
+		this.geometry.delete();
+		this.material.delete();
 	}
 }

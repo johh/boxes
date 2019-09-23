@@ -58,6 +58,7 @@ export default class Material {
 	private vertexSrc: string;
 	private fragmentSrc: string;
 	private attributeNames: string[];
+	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
 	private uniforms: UniformReferenceList = {};
 	private uniformQueue: UniformList = {};
@@ -81,8 +82,10 @@ export default class Material {
 	}
 
 
-	private compile( gl: WebGLRenderingContext ) {
+	private compile() {
 		if ( this.program ) return this.program;
+
+		const gl = this.gl;
 
 		const vertexShader = createShader( gl, this.vertexSrc, false );
 		const fragmentShader = createShader( gl, this.fragmentSrc, true );
@@ -106,7 +109,9 @@ export default class Material {
 	}
 
 
-	private ingestUniforms( gl: WebGLRenderingContext ) {
+	private ingestUniforms() {
+		const gl = this.gl;
+
 		Object.keys( this.uniformQueue ).forEach( ( key ) => {
 			const value = this.uniformQueue[key];
 
@@ -195,7 +200,9 @@ export default class Material {
 	}
 
 
-	private bindTextures( gl: WebGLRenderingContext ) {
+	private bindTextures() {
+		const gl = this.gl;
+
 		this.textures.forEach( ( texture, i ) => {
 			const textureLoc = texture.prepare( gl );
 
@@ -206,11 +213,12 @@ export default class Material {
 
 
 	public use( gl: WebGLRenderingContext ) {
-		const program = this.compile( gl );
-		gl.useProgram( program );
-		this.ingestUniforms( gl );
+		this.gl = gl;
+
+		gl.useProgram( this.compile() );
+		this.ingestUniforms();
 		this.prepare();
-		this.bindTextures( gl );
+		this.bindTextures();
 	}
 
 
@@ -239,5 +247,11 @@ export default class Material {
 		Object.keys( list ).forEach( ( key ) => {
 			this.updateUniform( key, list[key]);
 		});
+	}
+
+
+	public delete() {
+		if ( this.program ) this.gl.deleteProgram( this.program );
+		this.program = undefined;
 	}
 }

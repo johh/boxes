@@ -28,7 +28,14 @@ export interface GenericTextureProps {
 }
 
 
+export interface Texture {
+	isTexture: true;
+	prepare: ( gl: WebGLRenderingContext ) => WebGLTexture;
+}
+
+
 export default class GenericTexture implements Texture {
+	private gl: WebGLRenderingContext;
 	private texture: WebGLTexture;
 	private format: TextureFormat;
 	private type: TextureType;
@@ -59,6 +66,8 @@ export default class GenericTexture implements Texture {
 
 	public prepare( gl: WebGLRenderingContext ) {
 		if ( !this.texture ) {
+			this.gl = gl;
+
 			let data: Uint8Array;
 
 			switch ( this.format ) {
@@ -101,7 +110,7 @@ export default class GenericTexture implements Texture {
 
 		if ( this.needsUpdate ) {
 			this.needsUpdate = false;
-			this.update( gl, this.textureData );
+			this.update( this.textureData );
 		}
 
 		return this.texture;
@@ -114,10 +123,10 @@ export default class GenericTexture implements Texture {
 	}
 
 
-	public update( gl: WebGLRenderingContext, data: TexImageSource ) {
-		gl.bindTexture( gl.TEXTURE_2D, this.texture );
-		gl.texImage2D(
-			gl.TEXTURE_2D,
+	public update( data: TexImageSource ) {
+		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+		this.gl.texImage2D(
+			this.gl.TEXTURE_2D,
 			0,
 			this.format,
 			this.format,
@@ -125,12 +134,14 @@ export default class GenericTexture implements Texture {
 			data,
 		);
 		if ( this.mipmaps ) {
-			gl.generateMipmap( gl.TEXTURE_2D );
+			this.gl.generateMipmap( this.gl.TEXTURE_2D );
 		}
 	}
-}
 
-export interface Texture {
-	isTexture: true;
-	prepare: ( gl: WebGLRenderingContext ) => WebGLTexture;
+
+	public delete() {
+		if ( this.texture ) this.gl.deleteTexture( this.texture );
+
+		this.texture = undefined;
+	}
 }

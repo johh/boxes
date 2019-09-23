@@ -143,4 +143,13 @@ export default class Framebuffer {
 
 		this.gl.clear( bitMask );
 	}
+
+
+	public delete() {
+		this.gl.deleteFramebuffer( this.fbo );
+		this.gl.deleteTexture( this.texture );
+		if ( this.depthBuffer ) this.gl.deleteRenderbuffer( this.depthBuffer );
+		if ( this.stencilBuffer ) this.gl.deleteRenderbuffer( this.stencilBuffer );
+		if ( this.depthStencilBuffer ) this.gl.deleteRenderbuffer( this.depthStencilBuffer );
+	}
 }

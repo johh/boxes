@@ -18,6 +18,7 @@ export default class BufferGeometry {
 	protected indexBuffer: WebGLBuffer;
 	protected mode: TriangleDrawMode;
 	protected components: number;
+	private gl: WebGLRenderingContext;
 	private attributeSetupFunctions: Function[] = [];
 
 	constructor( props: BufferGeometryProps ) {
@@ -38,9 +39,10 @@ export default class BufferGeometry {
 	}
 
 
-	private upload( gl: WebGLRenderingContext ) {
+	private upload() {
 		if ( this.buffer ) return this.buffer;
 
+		const gl = this.gl;
 
 		let data = [].concat( this.verts );
 		const sizes: number[] = [this.components];
@@ -97,8 +99,10 @@ export default class BufferGeometry {
 	}
 
 
-	draw( gl: WebGLRenderingContext ) {
-		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload( gl ) );
+	public draw( gl: WebGLRenderingContext ) {
+		this.gl = gl;
+
+		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload() );
 		this.prepare();
 
 		if ( this.indices ) {
@@ -107,5 +111,14 @@ export default class BufferGeometry {
 		} else {
 			gl.drawArrays( this.mode, 0, this.verts.length / this.components );
 		}
+	}
+
+
+	public delete() {
+		if ( this.buffer ) this.gl.deleteBuffer( this.bufferData );
+		if ( this.indexBuffer ) this.gl.deleteBuffer( this.indexBuffer );
+
+		this.buffer = undefined;
+		this.indexBuffer = undefined;
 	}
 }

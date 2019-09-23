@@ -11,7 +11,9 @@ export default class TransformNode extends Transform implements Traversable {
 	public parent: Traversable;
 	public visible: boolean;
 	public maskOnly: boolean;
+	public onBeforeRender: ( ref: TransformNode ) => void;
 	public readonly isTransformNode = true;
+
 
 	constructor( props: TransformNodeProps = {}) {
 		super();
@@ -25,14 +27,16 @@ export default class TransformNode extends Transform implements Traversable {
 		this.maskOnly = maskOnly;
 	}
 
-	append( child: Traversable ) {
+
+	public append( child: Traversable ) {
 		if ( !this.children.includes( child ) ) {
 			this.children.push( child );
 			child.parent = this;
 		}
 	}
 
-	remove( child: Traversable ) {
+
+	public remove( child: Traversable ) {
 		if ( this.children.includes( child ) ) {
 			this.children.splice( this.children.findIndex( c => c === child ), 1 );
 			child.parent = null;

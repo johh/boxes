@@ -13,14 +13,14 @@ export default class Scene implements Traversable {
 	public children: Traversable[] = [];
 	public visible: boolean = true;
 
-	append( child: Traversable ) {
+	public append( child: Traversable ) {
 		if ( !this.children.includes( child ) ) {
 			this.children.push( child );
 			child.parent = this;
 		}
 	}
 
-	remove( child: Traversable ) {
+	public remove( child: Traversable ) {
 		if ( this.children.includes( child ) ) {
 			this.children.splice( this.children.findIndex( c => c === child ), 1 );
 			child.parent = null;
@@ -72,15 +72,18 @@ export default class Scene implements Traversable {
 						renderQueue.push( node );
 					}
 
+					if ( node.onBeforeRender ) node.onBeforeRender( node );
 					processChildren();
 				}
 			}  else if (
 				'isTransformNode' in node
 			)  {
 				if ( !node.maskOnly || queueMasks ) {
+					if ( node.onBeforeRender ) node.onBeforeRender( node );
 					processChildren();
 				}
 			} else {
+				if ( node.onBeforeRender ) node.onBeforeRender( node );
 				processChildren();
 			}
 		}

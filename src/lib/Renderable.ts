@@ -27,6 +27,7 @@ export default class Renderable extends TransformNode {
 	public depthWrite: boolean;
 	public mask: Traversable;
 	public blending: BlendType;
+	public onBeforeRender: ( ref: Renderable ) => void;
 
 
 	constructor( props: RenderableProps ) {

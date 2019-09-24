@@ -72,18 +72,15 @@ export default class Scene implements Traversable {
 						renderQueue.push( node );
 					}
 
-					if ( node.onBeforeRender ) node.onBeforeRender( node );
 					processChildren();
 				}
 			}  else if (
 				'isTransformNode' in node
 			)  {
 				if ( !node.maskOnly || queueMasks ) {
-					if ( node.onBeforeRender ) node.onBeforeRender( node );
 					processChildren();
 				}
 			} else {
-				if ( node.onBeforeRender ) node.onBeforeRender( node );
 				processChildren();
 			}
 		}
@@ -94,18 +91,24 @@ export default class Scene implements Traversable {
 		node: Renderable | TransformNode | Traversable,
 		parentWorldMatrix: mat4,
 	) {
-		let worldMatrix: mat4;
+		if ( node.visible ) {
+			// dirty hack: cast node into Renderable to satisfy TS
+			if ( node.onBeforeRender ) node.onBeforeRender( <Renderable>node );
 
-		if ( 'isTransformNode' in node ) {
-			node.updateMatrices( parentWorldMatrix );
-			worldMatrix = node.worldMatrix;
-		} else {
-			worldMatrix = parentWorldMatrix;
+			let worldMatrix: mat4;
+
+			if ( 'isTransformNode' in node ) {
+				node.updateMatrices( parentWorldMatrix );
+				worldMatrix = node.worldMatrix;
+			} else {
+				worldMatrix = parentWorldMatrix;
+			}
+
+			node.children.forEach( ( child ) => {
+				Scene.calculateTransforms( child, worldMatrix );
+			});
 		}
 
-		node.children.forEach( ( child ) => {
-			Scene.calculateTransforms( child, worldMatrix );
-		});
 	}
 
 

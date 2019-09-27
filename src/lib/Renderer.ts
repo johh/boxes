@@ -46,7 +46,7 @@ export default class Renderer {
 
 	public render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer ) {
 		this.gl.clearColor( ...this.clearColor );
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT );
 		camera.updateMatrices();
 
 		this.gl.viewport( 0, 0, this.width, this.height );

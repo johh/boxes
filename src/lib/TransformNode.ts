@@ -4,6 +4,7 @@ import Traversable from './Traversable';
 export interface TransformNodeProps {
 	visible?: boolean;
 	maskOnly?: boolean;
+	onBeforeRender?: ( ref: TransformNode ) => void;
 }
 
 export default class TransformNode extends Transform implements Traversable {
@@ -21,10 +22,12 @@ export default class TransformNode extends Transform implements Traversable {
 		const {
 			visible = true,
 			maskOnly = false,
+			onBeforeRender = null,
 		} = props;
 
 		this.visible = visible;
 		this.maskOnly = maskOnly;
+		this.onBeforeRender = onBeforeRender;
 	}
 
 

@@ -13,12 +13,15 @@ export default class Scene implements Traversable {
 	public children: Traversable[] = [];
 	public visible: boolean = true;
 
+
 	public append( child: Traversable ) {
+		if ( child.parent && child.parent !== this ) child.parent.remove( child );
 		if ( !this.children.includes( child ) ) {
 			this.children.push( child );
 			child.parent = this;
 		}
 	}
+
 
 	public remove( child: Traversable ) {
 		if ( this.children.includes( child ) ) {

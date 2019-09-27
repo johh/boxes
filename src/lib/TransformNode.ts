@@ -29,6 +29,7 @@ export default class TransformNode extends Transform implements Traversable {
 
 
 	public append( child: Traversable ) {
+		if ( child.parent && child.parent !== this ) child.parent.remove( child );
 		if ( !this.children.includes( child ) ) {
 			this.children.push( child );
 			child.parent = this;

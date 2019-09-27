@@ -1,11 +1,11 @@
 {
     "name": "@downpourdigital/boxes",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Babbies first WebGL library",
     "main": "dist/boxes.js",
     "repository": "https://github.com/johh/boxes.git",
     "author": "johh <code@johh.net>",
-    "license": "MIT",
+    "license": "BSD-4-Clause",
     "private": false,
     "scripts": {
         "build": "rollup -c",

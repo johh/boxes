@@ -115,7 +115,7 @@ export default class BufferGeometry {
 
 
 	public delete() {
-		if ( this.buffer ) this.gl.deleteBuffer( this.bufferData );
+		if ( this.buffer ) this.gl.deleteBuffer( this.buffer );
 		if ( this.indexBuffer ) this.gl.deleteBuffer( this.indexBuffer );
 
 		this.buffer = undefined;

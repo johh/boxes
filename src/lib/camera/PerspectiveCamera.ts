@@ -41,7 +41,7 @@ export default class PerspectiveCamera extends GenericCamera implements Camera {
 	public updateProjectionMatrix() {
 		mat4.perspective(
 			this.projectionMatrix,
-			this.fov,
+			this.fov * Math.PI / 180,
 			this.aspect,
 			this.near,
 			this.far,

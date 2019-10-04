@@ -137,6 +137,12 @@ export default class PostFxPipeline {
 	}
 
 
+	public setSize( width: number, height: number ) {
+		this.fboA.setSize( width, height );
+		this.fboB.setSize( width, height );
+	}
+
+
 	public delete() {
 		this.fboA.delete();
 		this.fboB.delete();

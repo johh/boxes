@@ -176,6 +176,31 @@ export default class Material {
 						updateFunction = ( value: { value: number}) => {
 							gl.uniform1i( location, value.value );
 						};
+						break;
+
+					case 'floatArray':
+						updateFunction = ( value: { value: Float32Array }) => {
+							gl.uniform1fv( location, value.value );
+						};
+						break;
+
+					case 'vec2Array':
+						updateFunction = ( value: { value: Float32Array }) => {
+							gl.uniform2fv( location, value.value );
+						};
+						break;
+
+					case 'vec3Array':
+						updateFunction = ( value: { value: Float32Array }) => {
+							gl.uniform3fv( location, value.value );
+						};
+						break;
+
+					case 'vec4Array':
+						updateFunction = ( value: { value: Float32Array }) => {
+							gl.uniform4fv( location, value.value );
+						};
+						break;
 					}
 				}
 

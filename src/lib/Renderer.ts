@@ -9,6 +9,7 @@ interface RendererPops {
 	canvas: HTMLCanvasElement;
 	width?: number;
 	height?: number;
+	transparency?: boolean;
 	clearColor?: [number, number, number, number];
 }
 
@@ -26,10 +27,11 @@ export default class Renderer {
 			canvas,
 			width = 800,
 			height = 600,
+			transparency = false,
 			clearColor = [0, 0, 0, 1],
 		} = props;
 
-		this.gl = canvas.getContext( 'webgl', { stencil: true });
+		this.gl = canvas.getContext( 'webgl', { alpha: transparency, stencil: true });
 		this.clearColor = <[number, number, number, number]>clearColor;
 
 		this.setSize( width, height );

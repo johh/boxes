@@ -7,6 +7,9 @@ export default class ShaderPass extends Material {
 		super({
 			fragmentShader,
 			vertexShader: unprojectedVertexShader,
+			uniforms: {
+				u_fTime: 0,
+			},
 		});
 	}
 }

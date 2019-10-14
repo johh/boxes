@@ -119,12 +119,12 @@ export default class PostFxPipeline {
 
 			if ( 'isMaterial' in step ) {
 				readBuffers.forEach( ( buffer, i ) => {
-					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE1 + i );
+					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE0 + i );
 					this.renderer.gl.bindTexture( this.renderer.gl.TEXTURE_2D, buffer.texture );
-					step.setUniform( `u_tDiffuse${i}`, { type: 'int', value: 1 + i });
+					step.updateUniform( `u_tDiffuse${i}`, ( v ) => { v[0] = i; });
 				});
 
-				step.setUniform( 'u_fTime', performance.now() );
+				step.updateUniform( 'u_fTime', ( v ) => { v[0] = performance.now(); });
 
 				this.renderer.renderDirect( this.tri, step, writeBuffer );
 

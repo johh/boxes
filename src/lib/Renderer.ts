@@ -5,12 +5,16 @@ import Material from './Material';
 import Framebuffer from './post/Framebuffer';
 
 
+type Color = [number, number, number, number];
+
+
 interface RendererPops {
 	canvas: HTMLCanvasElement;
 	width?: number;
 	height?: number;
 	transparency?: boolean;
-	clearColor?: [number, number, number, number];
+	clearColor?: Color;
+	autoClear?: boolean;
 }
 
 
@@ -19,7 +23,8 @@ export default class Renderer {
 	public canvas: HTMLCanvasElement;
 	public width: number;
 	public height: number;
-	public clearColor: [number, number, number, number];
+	public clearColor: Color;
+	public autoClear: boolean;
 
 
 	constructor( props: RendererPops ) {
@@ -28,11 +33,13 @@ export default class Renderer {
 			width = 800,
 			height = 600,
 			transparency = false,
-			clearColor = [0, 0, 0, 1],
+			clearColor = [0, 0, 0, 1] as Color,
+			autoClear = true,
 		} = props;
 
 		this.gl = canvas.getContext( 'webgl', { alpha: transparency, stencil: true });
-		this.clearColor = <[number, number, number, number]>clearColor;
+		this.clearColor = clearColor;
+		this.autoClear = autoClear;
 
 		this.setSize( width, height );
 	}
@@ -47,8 +54,8 @@ export default class Renderer {
 
 
 	public render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer ) {
-		this.gl.clearColor( ...this.clearColor );
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT );
+		if ( this.autoClear ) this.clear();
+
 		camera.updateMatrices();
 
 		this.gl.viewport( 0, 0, this.width, this.height );
@@ -67,15 +74,35 @@ export default class Renderer {
 
 
 	public renderDirect( geometry: BufferGeometry, material: Material, frameBuffer?: Framebuffer ) {
-
 		if ( frameBuffer ) {
 			frameBuffer.use();
 		} else {
 			this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, null );
 		}
 
-
 		material.use( this.gl );
 		geometry.draw( this.gl );
+	}
+
+
+	public clear() {
+		this.gl.clearColor( ...this.clearColor );
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT );
+	}
+
+
+	public clearColorBuffer() {
+		this.gl.clearColor( ...this.clearColor );
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+	}
+
+
+	public clearDepthBuffer() {
+		this.gl.clear( this.gl.DEPTH_BUFFER_BIT );
+	}
+
+
+	public clearStencilBuffer() {
+		this.gl.clear( this.gl.STENCIL_BUFFER_BIT );
 	}
 }

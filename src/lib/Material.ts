@@ -131,31 +131,30 @@ export default class Material {
 
 		if ( programCache.has( cacheKey ) ) {
 			this.program = programCache.get( cacheKey );
-			return this.program;
+		} else {
+			const gl = this.gl;
+
+			const vertexShader = createShader( gl, this.vertexSrc, false );
+			const fragmentShader = createShader( gl, this.fragmentSrc, true );
+
+			this.program = gl.createProgram();
+
+			gl.attachShader( this.program, vertexShader );
+			gl.attachShader( this.program, fragmentShader );
+
+			this.mapAttributes( attributes );
+
+			gl.linkProgram( this.program );
+
+			if ( !gl.getProgramParameter( this.program, gl.LINK_STATUS ) ) {
+				console.error( '[WEBGL] Program linking failed:', gl.getProgramInfoLog( this.program ) );
+			}
+
+			gl.deleteShader( vertexShader );
+			gl.deleteShader( fragmentShader );
+
+			programCache.set( cacheKey, this.program );
 		}
-
-		const gl = this.gl;
-
-		const vertexShader = createShader( gl, this.vertexSrc, false );
-		const fragmentShader = createShader( gl, this.fragmentSrc, true );
-
-		this.program = gl.createProgram();
-
-		gl.attachShader( this.program, vertexShader );
-		gl.attachShader( this.program, fragmentShader );
-
-		this.mapAttributes( attributes );
-
-		gl.linkProgram( this.program );
-
-		if ( !gl.getProgramParameter( this.program, gl.LINK_STATUS ) ) {
-			console.error( '[WEBGL] Program linking failed:', gl.getProgramInfoLog( this.program ) );
-		}
-
-		gl.deleteShader( vertexShader );
-		gl.deleteShader( fragmentShader );
-
-		programCache.set( cacheKey, this.program );
 
 		this.createUniformReferences();
 		if ( this.queuedUniforms ) this.setUniforms( this.queuedUniforms );

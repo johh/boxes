@@ -127,7 +127,7 @@ export default class Material {
 	private compile( attributes: string[]) {
 		if ( this.program ) return this.program;
 
-		const cacheKey = this.vertexSrc + this.fragmentSrc;
+		const cacheKey = this.vertexSrc + this.fragmentSrc + attributes.join( ',' );
 
 		if ( programCache.has( cacheKey ) ) {
 			this.program = programCache.get( cacheKey );

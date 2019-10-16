@@ -43,9 +43,16 @@ const renderer = new Renderer({
 	width: 800,
 	height: 600,
 	clearColor: [0, 0, 0, 1],
+	autoClear: true,
 });
 
 renderer.render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer );
+renderer.renderDirect( geometry: BufferGeometry, material: Material, frameBuffer?: Framebuffer );
+
+renderer.clear();
+renderer.clearColorBuffer();
+renderer.clearDepthBuffer();
+renderer.clearStencilBuffer();
 ```
 
 
@@ -57,10 +64,6 @@ import { Material, vec4, ImageTexture } from '@downpourdigital/boxes';
 const material = new Material({
 	vertexShader: '...',
 	fragmentShader: '...',
-	attributeNames: [
-		'a_vPosition',
-		'a_vUv',
-	],
 	uniforms: {
 		u_vYourUniform: vec4.fromValues( .5, 0, 1, 1 ),
 		u_vYourTexture: new ImageTexture(...),
@@ -78,6 +81,13 @@ material.updateUniform( 'u_vYourUniform', ( value ) => vec4.set( value, 1, 2, 3,
 material.updateUniforms({
 	u_vYourUniform: ( value ) => vec4.set( value, 1, 2, 3, 4 ),
 })
+
+// floats and ints are converted to a TypedArray internally
+material.setUniform( 'u_fFloat', 0 );
+// or
+material.setUniform( 'u_fFloat', new Float32Array( 1 ) );
+material.updateUniform( 'u_fFloat', v => v[0] = 1 );
+
 ```
 
 
@@ -93,16 +103,17 @@ const geometry = new BufferGeometry({
 		.5, .5, 0,
 	],
 	mode: enums.TRIANGLE_FAN,
-	attributes: [
-		[
+	attributes: {
+		a_vUv: [
 			0, 0,
 			0, 1,
 			1, 1,
 			1, 0,
 		],
-	],
+	},
+	vertexName: 'a_vPosition', // attribute name for data contained in 'verts'
 	indices: [], // indices for indexed geometries
-	components: 3, // number of components in each vertex
+	stride: 3, // number of components in each vertex
 });
 
 ```

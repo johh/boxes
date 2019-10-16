@@ -5,7 +5,7 @@ interface BufferGeometryProps {
 	mode?: TriangleDrawMode;
 	attributes?: number[][];
 	indices?: number[];
-	components?: number;
+	stride?: number;
 }
 
 
@@ -17,7 +17,7 @@ export default class BufferGeometry {
 	protected indices: Uint16Array;
 	protected indexBuffer: WebGLBuffer;
 	protected mode: TriangleDrawMode;
-	protected components: number;
+	protected stride: number;
 	private gl: WebGLRenderingContext;
 	private attributeSetupFunctions: Function[] = [];
 
@@ -27,12 +27,12 @@ export default class BufferGeometry {
 			attributes = [],
 			mode = WebGLRenderingContext.TRIANGLES,
 			indices,
-			components = 3,
+			stride = 3,
 		} = props;
 
 		this.verts = verts;
 		this.mode = mode;
-		this.components = components;
+		this.stride = stride;
 		this.attributes = attributes;
 
 		if ( indices ) this.indices = new Uint16Array( indices );
@@ -45,15 +45,15 @@ export default class BufferGeometry {
 		const gl = this.gl;
 
 		let data = [].concat( this.verts );
-		const sizes: number[] = [this.components];
+		const sizes: number[] = [this.stride];
 
 		this.attributes.forEach( ( attribute, i ) => {
-			let size = attribute.length / ( this.verts.length / this.components );
+			let size = attribute.length / ( this.verts.length / this.stride );
 
 			if ( size % 1 !== 0 ) {
 				console.warn( `[WEBGL] Unsupported attribute size in slot ${i}, filling with zeroes` );
 				size = 1;
-				data = data.concat( Array( this.verts.length / this.components ).fill( 0 ) );
+				data = data.concat( Array( this.verts.length / this.stride ).fill( 0 ) );
 			} else {
 				data = data.concat( attribute );
 			}
@@ -78,7 +78,7 @@ export default class BufferGeometry {
 				gl.vertexAttribPointer( i, size, gl.FLOAT, false, 0, _offset );
 			});
 
-			offset += ( this.verts.length / this.components ) * size * 4;
+			offset += ( this.verts.length / this.stride ) * size * 4;
 		});
 
 
@@ -109,7 +109,7 @@ export default class BufferGeometry {
 			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );
 			gl.drawElements( this.mode, this.indices.length, gl.UNSIGNED_SHORT, 0 );
 		} else {
-			gl.drawArrays( this.mode, 0, this.verts.length / this.components );
+			gl.drawArrays( this.mode, 0, this.verts.length / this.stride );
 		}
 	}
 

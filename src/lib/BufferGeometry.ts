@@ -3,37 +3,46 @@ import { TriangleDrawMode } from './Enums';
 interface BufferGeometryProps {
 	verts: number[];
 	mode?: TriangleDrawMode;
-	attributes?: number[][];
+	attributes?: BufferAttributeList;
 	indices?: number[];
 	stride?: number;
+	vertexName?: string;
 }
+
+
+type BufferAttributeList = {
+	[name: string]: number[],
+};
 
 
 export default class BufferGeometry {
 	protected verts: number[];
-	protected attributes: number[][];
+	protected attributes: BufferAttributeList;
 	protected bufferData: Float32Array;
 	protected buffer: WebGLBuffer;
 	protected indices: Uint16Array;
 	protected indexBuffer: WebGLBuffer;
 	protected mode: TriangleDrawMode;
 	protected stride: number;
+	public attributeNames: string[];
 	private gl: WebGLRenderingContext;
 	private attributeSetupFunctions: Function[] = [];
 
 	constructor( props: BufferGeometryProps ) {
 		const {
 			verts,
-			attributes = [],
+			attributes = {},
 			mode = WebGLRenderingContext.TRIANGLES,
 			indices,
 			stride = 3,
+			vertexName = 'a_vPosition',
 		} = props;
 
 		this.verts = verts;
 		this.mode = mode;
 		this.stride = stride;
 		this.attributes = attributes;
+		this.attributeNames = [vertexName, ...Object.keys( attributes )];
 
 		if ( indices ) this.indices = new Uint16Array( indices );
 	}
@@ -47,7 +56,8 @@ export default class BufferGeometry {
 		let data = [].concat( this.verts );
 		const sizes: number[] = [this.stride];
 
-		this.attributes.forEach( ( attribute, i ) => {
+
+		Object.values( this.attributes ).forEach( ( attribute, i ) => {
 			let size = attribute.length / ( this.verts.length / this.stride );
 
 			if ( size % 1 !== 0 ) {

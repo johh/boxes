@@ -12,7 +12,6 @@ import { isObject } from 'util';
 interface MaterialProps {
 	vertexShader?: string;
 	fragmentShader?: string;
-	attributeNames?: string[];
 	uniforms?: UniformList;
 }
 
@@ -115,19 +114,17 @@ export default class Material {
 		const {
 			vertexShader = defaultVertShader,
 			fragmentShader = defaultFragShader,
-			attributeNames = ['a_vPosition', 'a_vUv'],
 			uniforms,
 		} = props;
 
 		this.vertexSrc = vertexShader;
 		this.fragmentSrc = fragmentShader;
-		this.attributeNames = attributeNames;
 
 		if ( uniforms ) Object.assign( this.queuedUniforms, uniforms );
 	}
 
 
-	private compile() {
+	private compile( attributes: string[]) {
 		if ( this.program ) return this.program;
 
 		const cacheKey = this.vertexSrc + this.fragmentSrc;
@@ -147,9 +144,7 @@ export default class Material {
 		gl.attachShader( this.program, vertexShader );
 		gl.attachShader( this.program, fragmentShader );
 
-		this.attributeNames.forEach( ( name, i ) => {
-			gl.bindAttribLocation( this.program, i, name );
-		});
+		this.mapAttributes( attributes );
 
 		gl.linkProgram( this.program );
 
@@ -166,6 +161,15 @@ export default class Material {
 		if ( this.queuedUniforms ) this.setUniforms( this.queuedUniforms );
 
 		return this.program;
+	}
+
+
+	private mapAttributes( attributes: string[]) {
+		const gl = this.gl;
+
+		attributes.forEach( ( name, i ) => {
+			gl.bindAttribLocation( this.program, i, name );
+		});
 	}
 
 
@@ -218,10 +222,10 @@ export default class Material {
 	}
 
 
-	public use( gl: WebGLRenderingContext ) {
+	public use( gl: WebGLRenderingContext, attributes: string[] = []) {
 		this.gl = gl;
 
-		gl.useProgram( this.compile() );
+		gl.useProgram( this.compile( attributes ) );
 		this.commitUniforms();
 		this.bindTextures();
 	}

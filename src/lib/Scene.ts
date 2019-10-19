@@ -5,13 +5,17 @@ import TransformNode from './TransformNode';
 import Renderable from './Renderable';
 
 
-type RenderFunction = ( gl: WebGLRenderingContext ) => void;
-type RenderStep = Renderable | RenderFunction;
+type RenderTask = {
+	task?: ( gl: WebGLRenderingContext, view: mat4, projection: mat4 ) => void;
+	order: number;
+	subtasks?: RenderTask[];
+};
 
 
 export default class Scene implements Traversable {
 	public children: Traversable[] = [];
 	public visible: boolean = true;
+	private worldMatrix = mat4.create();
 
 
 	public append( child: Traversable ) {
@@ -34,7 +38,7 @@ export default class Scene implements Traversable {
 	static queueRenderables(
 		gl: WebGLRenderingContext,
 		node: Renderable | TransformNode | Traversable,
-		renderQueue: RenderStep[],
+		renderQueue: RenderTask[],
 		queueMasks: boolean = false,
 	) {
 		const processChildren = () => {
@@ -49,37 +53,53 @@ export default class Scene implements Traversable {
 			) {
 				if ( !node.maskOnly || queueMasks ) {
 					if ( node.mask ) {
-						renderQueue.push( ( gl ) => {
-							gl.clear( gl.STENCIL_BUFFER_BIT );
-							gl.stencilOp( gl.KEEP, gl.KEEP, gl.REPLACE );
-							gl.stencilFunc( gl.ALWAYS, 1, 0xff );
-							gl.stencilMask( 0xff );
-							gl.colorMask( false, false, false, false );
-							gl.depthMask( false );
-							gl.enable( gl.STENCIL_TEST );
-						});
-						Scene.queueRenderables( gl, node.mask, renderQueue, true );
-						renderQueue.push( ( gl ) => {
-							gl.stencilFunc( gl.EQUAL, 1, 0xff );
-							gl.stencilMask( 0x00 );
-							gl.colorMask( true, true, true, true );
-							gl.depthMask( true );
+						const subtasks: RenderTask[] = [
+							{
+								order: -Infinity,
+								task: ( gl ) => {
+									gl.clear( gl.STENCIL_BUFFER_BIT );
+									gl.stencilOp( gl.KEEP, gl.KEEP, gl.REPLACE );
+									gl.stencilFunc( gl.ALWAYS, 1, 0xff );
+									gl.stencilMask( 0xff );
+									gl.colorMask( false, false, false, false );
+									gl.depthMask( false );
+									gl.enable( gl.STENCIL_TEST );
+								},
+							},
+							{
+								order: Infinity,
+								task: ( gl, view, projection ) => {
+									gl.stencilFunc( gl.EQUAL, 1, 0xff );
+									gl.stencilMask( 0x00 );
+									gl.colorMask( true, true, true, true );
+									gl.depthMask( true );
 
-						});
-						renderQueue.push( node );
-						renderQueue.push( ( gl ) => {
-							gl.stencilMask( -1 );
-							gl.disable( gl.STENCIL_TEST );
+									node.render( gl, view, projection );
+
+									gl.stencilMask( -1 );
+									gl.disable( gl.STENCIL_TEST );
+								},
+							},
+						];
+						Scene.queueRenderables( gl, node.mask, subtasks, true );
+						subtasks.sort( ( a, b ) => a.order - b.order );
+
+						renderQueue.push({
+							subtasks,
+							order: node.renderOrder,
 						});
 					} else {
-						renderQueue.push( node );
+						renderQueue.push({
+							order: node.renderOrder,
+							task: ( gl, view, projection ) => node.render( gl, view, projection ),
+						});
 					}
 
 					processChildren();
 				}
-			}  else if (
+			} else if (
 				'isTransformNode' in node
-			)  {
+			) {
 				if ( !node.maskOnly || queueMasks ) {
 					processChildren();
 				}
@@ -115,21 +135,22 @@ export default class Scene implements Traversable {
 	}
 
 
+	static runRecursive( task: RenderTask, gl: WebGLRenderingContext, view: mat4, projection: mat4 ) {
+		if ( task.task ) task.task( gl, view, projection );
+		if ( task.subtasks ) task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection ) );
+	}
+
+
 	render(
 		gl: WebGLRenderingContext,
 		viewMatrix: mat4,
 		projectionMatrix: mat4,
 	) {
-		const renderQueue: RenderStep[] = [];
-		Scene.calculateTransforms( this, mat4.create() );
+		const renderQueue: RenderTask[] = [];
+		Scene.calculateTransforms( this, this.worldMatrix );
 		Scene.queueRenderables( gl, this, renderQueue );
 
-		renderQueue.forEach( ( step ) => {
-			if ( typeof step === 'function' ) {
-				step( gl );
-			} else {
-				step.render( gl, viewMatrix, projectionMatrix );
-			}
-		});
+		renderQueue.sort( ( a, b ) => a.order - b.order );
+		renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix ) );
 	}
 }

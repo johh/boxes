@@ -16,6 +16,7 @@ interface RenderableProps extends TransformNodeProps {
 	depthWrite?: boolean;
 	mask?: Traversable;
 	blending?: BlendType;
+	renderOrder?: number;
 	onBeforeRender?: ( ref: Renderable ) => void;
 }
 
@@ -28,6 +29,7 @@ export default class Renderable extends TransformNode {
 	public depthWrite: boolean;
 	public mask: Traversable;
 	public blending: BlendType;
+	public renderOrder: number;
 	public onBeforeRender: ( ref: Renderable ) => void;
 
 
@@ -41,6 +43,7 @@ export default class Renderable extends TransformNode {
 			depthTest = true,
 			depthWrite = true,
 			blending = 'normal',
+			renderOrder = 0,
 			onBeforeRender = null,
 		} = props;
 
@@ -50,6 +53,7 @@ export default class Renderable extends TransformNode {
 		this.depthWrite = depthWrite;
 		this.mask = mask;
 		this.blending = blending;
+		this.renderOrder = renderOrder;
 		this.onBeforeRender = onBeforeRender;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );

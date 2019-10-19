@@ -5,6 +5,7 @@ export interface TransformNodeProps {
 	visible?: boolean;
 	maskOnly?: boolean;
 	onBeforeRender?: ( ref: TransformNode ) => void;
+	onBeforeTransform?: ( ref: TransformNode ) => void;
 }
 
 export default class TransformNode extends Transform implements Traversable {
@@ -13,6 +14,7 @@ export default class TransformNode extends Transform implements Traversable {
 	public visible: boolean;
 	public maskOnly: boolean;
 	public onBeforeRender: ( ref: TransformNode ) => void;
+	public onBeforeTransform: ( ref: TransformNode ) => void;
 	public readonly isTransformNode = true;
 
 
@@ -23,11 +25,13 @@ export default class TransformNode extends Transform implements Traversable {
 			visible = true,
 			maskOnly = false,
 			onBeforeRender = null,
+			onBeforeTransform = null,
 		} = props;
 
 		this.visible = visible;
 		this.maskOnly = maskOnly;
 		this.onBeforeRender = onBeforeRender;
+		this.onBeforeTransform = onBeforeTransform;
 	}
 
 

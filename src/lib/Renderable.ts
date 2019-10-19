@@ -17,7 +17,6 @@ interface RenderableProps extends TransformNodeProps {
 	mask?: Traversable;
 	blending?: BlendType;
 	renderOrder?: number;
-	onBeforeRender?: ( ref: Renderable ) => void;
 }
 
 
@@ -30,7 +29,6 @@ export default class Renderable extends TransformNode {
 	public mask: Traversable;
 	public blending: BlendType;
 	public renderOrder: number;
-	public onBeforeRender: ( ref: Renderable ) => void;
 
 
 	constructor( props: RenderableProps ) {
@@ -44,7 +42,6 @@ export default class Renderable extends TransformNode {
 			depthWrite = true,
 			blending = 'normal',
 			renderOrder = 0,
-			onBeforeRender = null,
 		} = props;
 
 		this.geometry = geometry;
@@ -54,7 +51,6 @@ export default class Renderable extends TransformNode {
 		this.mask = mask;
 		this.blending = blending;
 		this.renderOrder = renderOrder;
-		this.onBeforeRender = onBeforeRender;
 
 		this.material.setUniform( 'u_mModel', mat4.create() );
 		this.material.setUniform( 'u_mView', mat4.create() );

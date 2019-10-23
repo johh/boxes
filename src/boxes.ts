@@ -4,6 +4,7 @@ export const enums = WebGLRenderingContext;
 
 export { default as Renderer } from './lib/Renderer';
 export { default as Material } from './lib/Material';
+export { default as UniformProvider } from './lib/UniformProvider';
 export { default as BufferGeometry } from './lib/BufferGeometry';
 export { default as Renderable } from './lib/Renderable';
 export { default as Scene } from './lib/Scene';

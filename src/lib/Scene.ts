@@ -3,6 +3,7 @@ import { mat4 } from 'gl-matrix';
 import Traversable from './Traversable';
 import TransformNode from './TransformNode';
 import Renderable from './Renderable';
+import UniformProivder from './UniformProvider';
 
 
 type RenderTask = {
@@ -11,6 +12,15 @@ type RenderTask = {
 	subtasks?: RenderTask[];
 };
 
+const renderNode = (
+	node: Renderable,
+	gl: WebGLRenderingContext,
+	view: mat4,
+	projection: mat4,
+) => {
+	if ( node.onBeforeRender ) node.onBeforeRender( node );
+	node.render( gl, view, projection );
+};
 
 export default class Scene implements Traversable {
 	public children: Traversable[] = [];
@@ -37,13 +47,14 @@ export default class Scene implements Traversable {
 
 	static queueRenderables(
 		gl: WebGLRenderingContext,
-		node: Renderable | TransformNode | Traversable,
+		node: Renderable | TransformNode | UniformProivder | Traversable,
 		renderQueue: RenderTask[],
+		uniformProviders: UniformProivder[],
 		queueMasks: boolean = false,
 	) {
-		const processChildren = () => {
+		const processChildren = ( _uniformProviders = uniformProviders ) => {
 			node.children.forEach( ( child ) => {
-				Scene.queueRenderables( gl, child, renderQueue, queueMasks );
+				Scene.queueRenderables( gl, child, renderQueue, _uniformProviders, queueMasks );
 			});
 		};
 
@@ -51,6 +62,15 @@ export default class Scene implements Traversable {
 			if (
 				'isRenderable' in node
 			) {
+				const renderNode = (
+					view: mat4,
+					projection: mat4,
+				) => {
+					uniformProviders.forEach( p => p.applyUniformsToNode( node ) );
+					if ( node.onBeforeRender ) node.onBeforeRender( node );
+					node.render( gl, view, projection );
+				};
+
 				if ( !node.maskOnly || queueMasks ) {
 					if ( node.mask ) {
 						const subtasks: RenderTask[] = [
@@ -74,14 +94,14 @@ export default class Scene implements Traversable {
 									gl.colorMask( true, true, true, true );
 									gl.depthMask( true );
 
-									node.render( gl, view, projection );
+									renderNode( view, projection );
 
 									gl.stencilMask( -1 );
 									gl.disable( gl.STENCIL_TEST );
 								},
 							},
 						];
-						Scene.queueRenderables( gl, node.mask, subtasks, true );
+						Scene.queueRenderables( gl, node.mask, subtasks, uniformProviders, true );
 						subtasks.sort( ( a, b ) => a.order - b.order );
 
 						renderQueue.push({
@@ -92,8 +112,7 @@ export default class Scene implements Traversable {
 						renderQueue.push({
 							order: node.renderOrder,
 							task: ( gl, view, projection ) => {
-								if ( node.onBeforeRender ) node.onBeforeRender( node );
-								node.render( gl, view, projection );
+								renderNode( view, projection );
 							},
 						});
 					}
@@ -113,6 +132,11 @@ export default class Scene implements Traversable {
 
 					processChildren();
 				}
+			} else if ( 'isUniformProvider' in node ) {
+				const childProviders = uniformProviders.slice( 0 );
+				childProviders.push( node );
+
+				processChildren( childProviders );
 			} else {
 				processChildren();
 			}
@@ -157,7 +181,7 @@ export default class Scene implements Traversable {
 	) {
 		const renderQueue: RenderTask[] = [];
 		Scene.calculateTransforms( this, this.worldMatrix );
-		Scene.queueRenderables( gl, this, renderQueue );
+		Scene.queueRenderables( gl, this, renderQueue, []);
 
 		renderQueue.sort( ( a, b ) => a.order - b.order );
 		renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix ) );

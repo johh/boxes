@@ -16,15 +16,17 @@ interface MaterialProps {
 }
 
 
-interface UniformList {
+export interface UniformList {
 	[key: string]: UniformValue;
 }
 
 
-type UpdateFunction = ( previousValue: InternalUniformValue ) => InternalUniformValue | void;
+type UniformUpdateFunction =
+	( previousValue: InternalUniformValue ) => InternalUniformValue | void;
+
 
 interface UniformUpdateList {
-	[key: string]: UpdateFunction;
+	[key: string]: UniformUpdateFunction;
 }
 
 
@@ -244,30 +246,10 @@ export default class Material {
 			case WebGLRenderingContext.SAMPLER_CUBE:
 				if ( isObject( value ) && 'isTexture' in ( value as any ) ) {
 					this.textures[ref.value[0]] = value as Texture;
-				} else if ( value instanceof Int32Array ) {
-					ref.value = value;
 				} else {
-					ref.value[0] = value as number;
+					ref.value = value as Int32Array;
 				}
-				break;
 
-
-			case WebGLRenderingContext.INT:
-				if ( value instanceof Int32Array ) {
-					ref.value = value;
-				} else {
-					if ( !ref.value ) ref.value = new Int32Array( 1 );
-					ref.value[0] = value as number;
-				}
-				break;
-
-			case WebGLRenderingContext.FLOAT:
-				if ( value instanceof Float32Array ) {
-					ref.value = value;
-				} else {
-					if ( !ref.value ) ref.value = new Float32Array( 1 );
-					ref.value[0] = value as number;
-				}
 				break;
 
 			default:
@@ -288,7 +270,7 @@ export default class Material {
 	}
 
 
-	public updateUniform( key: string, func: UpdateFunction ) {
+	public updateUniform( key: string, func: UniformUpdateFunction ) {
 		if ( this.uniforms.has( key ) ) {
 			const ref = this.uniforms.get( key );
 

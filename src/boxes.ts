@@ -17,4 +17,8 @@ export { default as Framebuffer } from './lib/post/Framebuffer';
 
 export { default as ImageTexture } from './lib/texture/ImageTexture';
 
+import * as float from './lib/math/float';
+import * as int from './lib/math/int';
+
+export { int, float };
 export { vec2, vec3, vec4, mat3, mat4 } from 'gl-matrix';

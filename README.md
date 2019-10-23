@@ -139,7 +139,7 @@ const obj1 = new Renderable({
 Inherits the transform properties from `TransformNode` and provides the following uniforms:
 
 * `mat4 u_mModel` – the model matrix
-* `mat4 u_mView` – the view matrix
+* `mat4 u_mView` – the view matrix (provided by the camera)
 * `mat4 u_mProjection` – the projection matrix (provided by the camera)
 
 
@@ -155,14 +155,14 @@ const group = new TransformNode({
 group.append( child ); // append renderable or another transform node
 group.remove( child );
 
-vec3.set(group.origin, 0, 0, 0 );
-vec3.set(group.translation, 0, 0, 0 );
-vec3.set(group.scale, 1, 1, 1 );
-vec3.set(group.rotation, 0, 0, 0 );
+vec3.set( group.origin, 0, 0, 0 );
+vec3.set( group.translation, 0, 0, 0 );
+vec3.set( group.scale, 1, 1, 1 );
+vec3.set( group.rotation, 0, 0, 0 );
 ```
 
 
-### UniformProvider
+#### UniformProvider
 ```typescript
 import { UniformProvider, float } from '@downpourdigital/boxes';
 
@@ -172,8 +172,8 @@ const provider = new UniformProvider({
 	},
 });
 
-provider.append( someRenderable );
-scene.append( provider );
+provider.append( child ); // append renderable or another transform node
+parent.append( provider );
 ```
 `UniformProvider` acts like a node in the scene graph. It injects the given uniforms into all descendants. Setting/updating the uniforms works identically to `Material`.
 

@@ -21,6 +21,7 @@ import {
 	ImageTexture,
 	Scene,
 	TransformNode,
+	UniformProvider,
 	OrthoCamera,
 	PerspectiveCamera,
 	PostFxPipeline,
@@ -28,6 +29,7 @@ import {
 	Framebuffer,
 	vec2, vec3, vec4,
 	mat2, mat3,
+	float, int,
 	enums,
 } from '@downpourdigital/boxes';
 
@@ -59,7 +61,7 @@ renderer.clearStencilBuffer();
 
 #### Material
 ```typescript
-import { Material, vec4, ImageTexture } from '@downpourdigital/boxes';
+import { Material, vec4, float, ImageTexture } from '@downpourdigital/boxes';
 
 const material = new Material({
 	vertexShader: '...',
@@ -82,11 +84,11 @@ material.updateUniforms({
 	u_vYourUniform: ( value ) => vec4.set( value, 1, 2, 3, 4 ),
 })
 
-// floats and ints are converted to a TypedArray internally
-material.setUniform( 'u_fFloat', 0 );
+// floats and ints are specified by a TypedArray
+material.setUniform( 'u_fFloat', float.fromValue( 0 ) );
 // or
 material.setUniform( 'u_fFloat', new Float32Array( 1 ) );
-material.updateUniform( 'u_fFloat', v => v[0] = 1 );
+material.updateUniform( 'u_fFloat', v => float.set( v, 1 ) );
 
 ```
 
@@ -158,6 +160,22 @@ vec3.set(group.translation, 0, 0, 0 );
 vec3.set(group.scale, 1, 1, 1 );
 vec3.set(group.rotation, 0, 0, 0 );
 ```
+
+
+### UniformProvider
+```typescript
+import { UniformProvider, float } from '@downpourdigital/boxes';
+
+const provider = new UniformProvider({
+	uniforms: {
+		u_fTest: float.fromValue( .5 ),
+	},
+});
+
+provider.append( someRenderable );
+scene.append( provider );
+```
+`UniformProvider` acts like a node in the scene graph. It injects the given uniforms into all descendants. Setting/updating the uniforms works identically to `Material`.
 
 
 #### Scene

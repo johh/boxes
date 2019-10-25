@@ -4,25 +4,25 @@ import { UniformList } from './Material';
 import { UniformValue } from './UniformValue';
 
 
-type UniformProivderUpdateFunction =
+type UniformProviderUpdateFunction =
 	( previousValue: UniformValue ) => UniformValue | void;
 
-interface UniformProivderUpdateList {
-	[key: string]: UniformProivderUpdateFunction;
+interface UniformProviderUpdateList {
+	[key: string]: UniformProviderUpdateFunction;
 }
 
 
-interface UniformProivderProps extends TraversableProps {
+interface UniformProviderProps extends TraversableProps {
 	uniforms: UniformList;
 }
 
 
-export default class UniformProivder extends Traversable {
+export default class UniformProvider extends Traversable {
 	public readonly isUniformProvider = true;
 	public uniforms: UniformList;
 
 
-	constructor( props: UniformProivderProps ) {
+	constructor( props: UniformProviderProps ) {
 		super( props );
 
 		const {
@@ -45,12 +45,12 @@ export default class UniformProivder extends Traversable {
 	}
 
 
-	public updateUniform( key: string, func: UniformProivderUpdateFunction ) {
+	public updateUniform( key: string, func: UniformProviderUpdateFunction ) {
 		this.uniforms[key] = func( this.uniforms[key]) || this.uniforms[key];
 	}
 
 
-	public updateUniforms( list: UniformProivderUpdateList ) {
+	public updateUniforms( list: UniformProviderUpdateList ) {
 		Object.keys( list ).forEach( ( key ) => {
 			this.updateUniform( key, list[key]);
 		});

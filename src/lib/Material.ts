@@ -103,7 +103,6 @@ const getSetterFunction = (
 export default class Material {
 	private vertexSrc: string;
 	private fragmentSrc: string;
-	private attributeNames: string[];
 	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
 	private uniforms = new Map<string, UniformReference>();

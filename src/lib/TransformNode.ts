@@ -1,5 +1,5 @@
-import Traversable, { TraversableProps } from './Traversable';
 import { vec3, mat4, quat } from 'gl-matrix';
+import Traversable, { TraversableProps } from './Traversable';
 
 
 export interface TransformNodeProps extends TraversableProps {

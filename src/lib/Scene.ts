@@ -24,6 +24,8 @@ const renderNode = (
 
 export default class Scene extends Traversable {
 	private worldMatrix = mat4.create();
+	private renderQueue: RenderTask[] = [];
+	private shouldRebuildSceneGraph: boolean = true;
 
 
 	static queueRenderables(
@@ -151,16 +153,26 @@ export default class Scene extends Traversable {
 	}
 
 
-	render(
+	public invalidateSceneGraph() {
+		this.shouldRebuildSceneGraph = true;
+	}
+
+
+	public render(
 		gl: WebGLRenderingContext,
 		viewMatrix: mat4,
 		projectionMatrix: mat4,
 	) {
-		const renderQueue: RenderTask[] = [];
 		Scene.calculateTransforms( this, this.worldMatrix );
-		Scene.queueRenderables( gl, this, renderQueue, []);
 
-		renderQueue.sort( ( a, b ) => a.order - b.order );
-		renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix ) );
+		if ( this.shouldRebuildSceneGraph ) {
+			this.renderQueue = [];
+			Scene.queueRenderables( gl, this, this.renderQueue, []);
+
+			this.shouldRebuildSceneGraph = false;
+		}
+
+		this.renderQueue.sort( ( a, b ) => a.order - b.order );
+		this.renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix ) );
 	}
 }

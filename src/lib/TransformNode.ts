@@ -1,53 +1,62 @@
-import Transform from './Transform';
-import Traversable from './Traversable';
+import Traversable, { TraversableProps } from './Traversable';
+import { vec3, mat4, quat } from 'gl-matrix';
 
-export interface TransformNodeProps {
-	visible?: boolean;
-	maskOnly?: boolean;
-	onBeforeRender?: ( ref: TransformNode ) => void;
+
+export interface TransformNodeProps extends TraversableProps {
 	onBeforeTransform?: ( ref: TransformNode ) => void;
 }
 
-export default class TransformNode extends Transform implements Traversable {
-	public children: Traversable[] = [];
-	public parent: Traversable;
-	public visible: boolean;
-	public maskOnly: boolean;
-	public onBeforeRender: ( ref: TransformNode ) => void;
-	public onBeforeTransform: ( ref: TransformNode ) => void;
+
+export default class TransformNode extends Traversable {
 	public readonly isTransformNode = true;
+	public onBeforeTransform: ( ref: TransformNode ) => void;
+	public origin = vec3.create();
+	public translation = vec3.create();
+	public scale = vec3.fromValues( 1, 1, 1 );
+	public rotation = vec3.create();
+	public localMatrix = mat4.create();
+	public worldMatrix = mat4.create();
+	private quatRotation = quat.create();
 
 
 	constructor( props: TransformNodeProps = {}) {
-		super();
+		super( props );
 
 		const {
-			visible = true,
-			maskOnly = false,
-			onBeforeRender = null,
 			onBeforeTransform = null,
 		} = props;
 
-		this.visible = visible;
-		this.maskOnly = maskOnly;
-		this.onBeforeRender = onBeforeRender;
 		this.onBeforeTransform = onBeforeTransform;
 	}
 
 
-	public append( child: Traversable ) {
-		if ( child.parent && child.parent !== this ) child.parent.remove( child );
-		if ( !this.children.includes( child ) ) {
-			this.children.push( child );
-			child.parent = this;
+	public updateLocalMatrix() {
+		quat.fromEuler( this.quatRotation, this.rotation[0], this.rotation[1], this.rotation[2]);
+
+		mat4.fromRotationTranslationScaleOrigin(
+			this.localMatrix,
+			this.quatRotation,
+			this.translation,
+			this.scale,
+			this.origin,
+		);
+
+		return this.localMatrix;
+	}
+
+
+	public updateWorldMatrix( parentWorldMatrix?: mat4 ) {
+		if ( parentWorldMatrix ) {
+			mat4.mul( this.worldMatrix, parentWorldMatrix, this.localMatrix );
+		} else {
+			mat4.copy( this.worldMatrix, this.localMatrix );
 		}
 	}
 
 
-	public remove( child: Traversable ) {
-		if ( this.children.includes( child ) ) {
-			this.children.splice( this.children.findIndex( c => c === child ), 1 );
-			child.parent = null;
-		}
+	public updateMatrices( parentWorldMatrix?: mat4 ) {
+		// TODO: check if localMatrix needs update
+		this.updateLocalMatrix();
+		this.updateWorldMatrix( parentWorldMatrix );
 	}
 }

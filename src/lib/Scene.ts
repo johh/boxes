@@ -22,27 +22,8 @@ const renderNode = (
 	node.render( gl, view, projection );
 };
 
-export default class Scene implements Traversable {
-	public children: Traversable[] = [];
-	public visible: boolean = true;
+export default class Scene extends Traversable {
 	private worldMatrix = mat4.create();
-
-
-	public append( child: Traversable ) {
-		if ( child.parent && child.parent !== this ) child.parent.remove( child );
-		if ( !this.children.includes( child ) ) {
-			this.children.push( child );
-			child.parent = this;
-		}
-	}
-
-
-	public remove( child: Traversable ) {
-		if ( this.children.includes( child ) ) {
-			this.children.splice( this.children.findIndex( c => c === child ), 1 );
-			child.parent = null;
-		}
-	}
 
 
 	static queueRenderables(
@@ -119,26 +100,22 @@ export default class Scene implements Traversable {
 
 					processChildren();
 				}
-			} else if (
-				'isTransformNode' in node
-			) {
-				if ( !node.maskOnly || queueMasks ) {
-					if ( node.onBeforeRender ) {
-						renderQueue.push({
-							order: 0,
-							task: () => node.onBeforeRender( node ),
-						});
-					}
+			} else if ( !node.maskOnly || queueMasks ) {
+				if ( node.onBeforeRender ) {
+					renderQueue.push({
+						order: 0,
+						task: () => node.onBeforeRender( node ),
+					});
+				}
 
+				if ( 'isUniformProvider' in node ) {
+					const childProviders = uniformProviders.slice( 0 );
+					childProviders.push( node );
+
+					processChildren( childProviders );
+				} else {
 					processChildren();
 				}
-			} else if ( 'isUniformProvider' in node ) {
-				const childProviders = uniformProviders.slice( 0 );
-				childProviders.push( node );
-
-				processChildren( childProviders );
-			} else {
-				processChildren();
 			}
 		}
 	}

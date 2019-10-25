@@ -1,16 +1,11 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { mat4 } from 'gl-matrix';
 
-import Transform from '../Transform';
+import TransformNode from '../TransformNode';
 
 
-export default class GenericCamera extends Transform {
+export default class GenericCamera extends TransformNode {
 	public projectionMatrix: mat4 = mat4.create();
 	public viewMatrix: mat4 = mat4.create();
-
-
-	constructor() {
-		super();
-	}
 
 
 	public updateMatrices() {

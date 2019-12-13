@@ -4,6 +4,7 @@ import Traversable from './Traversable';
 import TransformNode from './TransformNode';
 import Renderable from './Renderable';
 import UniformProivder from './UniformProvider';
+import HitRegion from './hitRegion/GenericHitRegion';
 
 
 type RenderTask = {
@@ -12,15 +13,6 @@ type RenderTask = {
 	subtasks?: RenderTask[];
 };
 
-const renderNode = (
-	node: Renderable,
-	gl: WebGLRenderingContext,
-	view: mat4,
-	projection: mat4,
-) => {
-	if ( node.onBeforeRender ) node.onBeforeRender( node );
-	node.render( gl, view, projection );
-};
 
 export default class Scene extends Traversable {
 	private worldMatrix = mat4.create();
@@ -124,7 +116,7 @@ export default class Scene extends Traversable {
 
 
 	static calculateTransforms(
-		node: Renderable | TransformNode | Traversable,
+		node: Renderable | TransformNode | HitRegion | Traversable,
 		parentWorldMatrix: mat4,
 	) {
 		if ( node.visible ) {
@@ -137,6 +129,10 @@ export default class Scene extends Traversable {
 				worldMatrix = node.worldMatrix;
 			} else {
 				worldMatrix = parentWorldMatrix;
+			}
+
+			if ( 'isHitRegion' in node ) {
+				node.setWorldMatrix( worldMatrix );
 			}
 
 			node.children.forEach( ( child ) => {

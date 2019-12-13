@@ -18,6 +18,7 @@ export default class GenericCamera extends TransformNode {
 export interface Camera {
 	projectionMatrix: mat4;
 	viewMatrix: mat4;
+	aspect: number;
 	updateMatrices: () => void;
 	updateProjectionMatrix: () => void;
 }

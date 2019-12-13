@@ -20,6 +20,7 @@ export default class OrthoCamera extends GenericCamera implements Camera {
 	public bottom: number;
 	public near: number;
 	public far: number;
+	public aspect: number;
 
 
 	constructor( props: OrthoCameraProps = {}) {
@@ -46,6 +47,8 @@ export default class OrthoCamera extends GenericCamera implements Camera {
 
 
 	public updateProjectionMatrix() {
+		this.aspect = Math.abs( this.right - this.left ) / Math.abs( this.top - this.bottom );
+
 		mat4.ortho(
 			this.projectionMatrix,
 			this.left,

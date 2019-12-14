@@ -24,9 +24,9 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 	private initialVerts: number[];
 	private matrix = mat4.create();
 
+
 	constructor( props: HitRegionPolygonProps ) {
 		super( props );
-
 
 		const {
 			listener,
@@ -35,7 +35,6 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 
 		this.listener = listener;
 		this.initialVerts = verts.slice( 0 );
-
 
 		// TODO: sanity checks
 		this.verts = Array( verts.length / 2 ).fill( 0 ).map( () => vec4.create() );
@@ -49,7 +48,7 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 	}
 
 
-	public test( camera: Camera, coords: vec2 ) {
+	public test( camera: Camera, coords: vec2 ): boolean {
 		mat4.mul( this.matrix, camera.projectionMatrix, camera.viewMatrix );
 		mat4.mul( this.matrix, this.matrix, this.worldMatrix );
 
@@ -63,11 +62,14 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 
 		vec2.set( mouse, coords[0], coords[1]);
 
-
 		if ( fastPointInPolygon( mouse, this.verts ) ) {
-			console.log( 'IN POLY!' );
+			if ( this.listener ) this.listener();
+			return true;
 		}
+
+		return false;
 	}
+
 
 	public debug() {
 		const geometry = new BufferGeometry({

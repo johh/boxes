@@ -14,7 +14,9 @@ export { default as PerspectiveCamera } from './lib/camera/PerspectiveCamera';
 export { default as PostFxPipeline } from './lib/post/PostFxPipeline';
 export { default as ShaderPass } from './lib/post/ShaderPass';
 export { default as Framebuffer } from './lib/post/Framebuffer';
+
 export { default as HitRegionSphere } from './lib/hitRegion/HitRegionSphere';
+export { default as HitRegionPolygon } from './lib/hitRegion/HitRegionPolygon';
 
 export { default as ImageTexture } from './lib/texture/ImageTexture';
 

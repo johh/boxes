@@ -1,6 +1,7 @@
+import { vec4, vec2 } from 'gl-matrix';
+
 import GenericHitRegion, { HitRegion } from './GenericHitRegion';
 import { TraversableProps } from '../Traversable';
-import { vec4, vec2 } from 'gl-matrix';
 import { Camera } from '../camera/GenericCamera';
 
 

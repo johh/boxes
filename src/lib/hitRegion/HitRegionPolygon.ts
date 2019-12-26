@@ -13,13 +13,11 @@ const mouse = vec2.create();
 
 
 interface HitRegionPolygonProps extends TraversableProps {
-	listener?: () => void;
 	verts?: number[];
 }
 
 
 export default class HitRegionPolygon extends GenericHitRegion implements HitRegion {
-	public listener: () => void;
 	private verts: vec4[];
 	private initialVerts: number[];
 	private matrix = mat4.create();
@@ -29,11 +27,9 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 		super( props );
 
 		const {
-			listener,
 			verts = [-.5, -.5, -.5, .5, .5, .5, .5, -.5],
 		} = props;
 
-		this.listener = listener;
 		this.initialVerts = verts.slice( 0 );
 
 		// TODO: sanity checks
@@ -62,12 +58,8 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 
 		vec2.set( mouse, coords[0], coords[1]);
 
-		if ( fastPointInPolygon( mouse, this.verts ) ) {
-			if ( this.listener ) this.listener();
-			return true;
-		}
 
-		return false;
+		return fastPointInPolygon( mouse, this.verts );
 	}
 
 

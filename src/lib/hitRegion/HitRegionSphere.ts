@@ -11,13 +11,11 @@ const mouse = vec2.create();
 
 
 interface HitRegionSphereProps extends TraversableProps {
-	listener?: ( proximity: number ) => void;
 	radius?: number;
 }
 
 
 export default class HitRegionSphere extends GenericHitRegion implements HitRegion{
-	public listener: ( proximity: number ) => void;
 	public radius: number;
 
 
@@ -25,11 +23,9 @@ export default class HitRegionSphere extends GenericHitRegion implements HitRegi
 		super( props );
 
 		const {
-			listener,
 			radius = 1,
 		} = props;
 
-		this.listener = listener;
 		this.radius = radius;
 	}
 
@@ -48,10 +44,7 @@ export default class HitRegionSphere extends GenericHitRegion implements HitRegi
 		const distance = vec2.distance( mouse, projected );
 
 		if ( distance < maxDistance ) {
-			const proximity = 1 - ( distance / maxDistance );
-
-			if ( this.listener ) this.listener( proximity );
-			return proximity;
+			return 1 - ( distance / maxDistance );
 		}
 
 		return 0;

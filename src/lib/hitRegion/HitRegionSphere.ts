@@ -30,17 +30,19 @@ export default class HitRegionSphere extends GenericHitRegion implements HitRegi
 	}
 
 
-	public test( camera: Camera, coords: vec2 ): number {
+	public test( coords: vec2 ): number {
+		const { projectionMatrix, viewMatrix, aspect } = this.scene.activeCamera;
+
 		vec4.set( vert, 0, 0, 0, 1 );
 		vec4.transformMat4( vert, vert, this.worldMatrix );
-		vec4.transformMat4( vert, vert, camera.viewMatrix );
-		vec4.transformMat4( vert, vert, camera.projectionMatrix );
+		vec4.transformMat4( vert, vert, viewMatrix );
+		vec4.transformMat4( vert, vert, projectionMatrix );
 
-		vec2.set( projected, vert[0] / vert[3] * camera.aspect, vert[1] / vert[3]);
+		vec2.set( projected, vert[0] / vert[3] * aspect, vert[1] / vert[3]);
 
-		vec2.set( mouse, coords[0] * camera.aspect, coords[1]);
+		vec2.set( mouse, coords[0] * aspect, coords[1]);
 
-		const maxDistance = this.radius / vert[3] * camera.projectionMatrix[5];
+		const maxDistance = this.radius / vert[3] * projectionMatrix[5];
 		const distance = vec2.distance( mouse, projected );
 
 		if ( distance < maxDistance ) {

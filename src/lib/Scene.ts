@@ -118,10 +118,16 @@ export default class Scene extends Traversable {
 	}
 
 
-	static calculateTransforms(
-		node: Renderable | TransformNode | HitRegion | Traversable,
-		parentWorldMatrix: mat4,
-	) {
+	static runRecursive( task: RenderTask, gl: WebGLRenderingContext, view: mat4, projection: mat4 ) {
+		if ( task.task ) task.task( gl, view, projection );
+		if ( task.subtasks ) task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection ) );
+	}
+
+
+	public calculateTransforms(
+			node: Renderable | TransformNode | HitRegion | Traversable,
+			parentWorldMatrix: mat4,
+		) {
 		if ( node.visible ) {
 			let worldMatrix: mat4;
 
@@ -136,19 +142,14 @@ export default class Scene extends Traversable {
 
 			if ( 'isHitRegion' in node ) {
 				node.setWorldMatrix( worldMatrix );
+				node.scene = this;
 			}
 
 			node.children.forEach( ( child ) => {
-				Scene.calculateTransforms( child, worldMatrix );
+				this.calculateTransforms( child, worldMatrix );
 			});
 		}
 
-	}
-
-
-	static runRecursive( task: RenderTask, gl: WebGLRenderingContext, view: mat4, projection: mat4 ) {
-		if ( task.task ) task.task( gl, view, projection );
-		if ( task.subtasks ) task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection ) );
 	}
 
 
@@ -160,7 +161,8 @@ export default class Scene extends Traversable {
 	public render(
 		gl: WebGLRenderingContext,
 	) {
-		Scene.calculateTransforms( this, this.worldMatrix );
+		this.calculateTransforms( this, this.worldMatrix );
+
 		if ( !this.activeCamera ) {
 			console.warn( 'Scene: No active camera provided.' );
 

@@ -27,6 +27,8 @@ import {
 	PostFxPipeline,
 	ShaderPass,
 	Framebuffer,
+	HitRegionSphere,
+	HitRegionPolygon,
 	vec2, vec3, vec4,
 	mat2, mat3,
 	float, int,
@@ -48,7 +50,7 @@ const renderer = new Renderer({
 	autoClear: true,
 });
 
-renderer.render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer );
+renderer.render( scene: Scene, frameBuffer?: Framebuffer );
 renderer.renderDirect( geometry: BufferGeometry, material: Material, frameBuffer?: Framebuffer );
 
 renderer.clear();
@@ -183,6 +185,7 @@ parent.append( provider );
 import { Scene } from '@downpourdigital/boxes';
 
 const scene = new Scene();
+scene.activeCamera = someCamera; // set active camera to render from
 scene.append( child ); // append renderable or another transform node
 scene.remove( child );
 ```
@@ -265,7 +268,7 @@ const fboA = new Framebuffer({
 
 
 postFx.render([
-	{ scene, camera },		//	first render a scene
+	scene,				//	first render a scene
 	shaderPassA,			//	apply a shaderpass
 	fboA,				//	render to fboA
 ]);
@@ -285,6 +288,46 @@ The following uniforms are provided by the ShaderPass:
 additionally, the following varyings are supplied:
 
 * `vec2 v_vUv` – the texture coordinates
+
+
+#### HitRegionSphere
+`HitRegionSphere ` is a spherical raycasting / hit detection target.
+The `.test` method returns the proximity to the spheres center, where 1 is the exact center and 0 the outer radius. The `coords` argument describes the point to test in view space coordinates (scaled to -1 to 1).
+
+```typescript
+import {
+	HitRegionSphere,
+} from '@downpourdigital/boxes';
+
+const hitregion = new HitRegionSphere({
+	radius: 1,
+});
+
+someTraversable.append( hitregion );
+
+const proximity = hitregion.test( coords: vec2 );
+if( proximity > 0 ) console.log( 'hit!' );
+
+```
+
+
+#### HitRegionPolygon
+`HitRegionPolygon` is a polygonal raycasting / hit detection target. The constructor accepts an array of 2D vertices to define the polygonal shape. It defaults to a 1 by 1 plane. 
+
+```typescript
+import {
+	HitRegionPolygon,
+} from '@downpourdigital/boxes';
+
+const hitregion = new HitRegionPolygon({
+	verts: [-.5, -.5, -.5, .5, .5, .5, .5, -.5], // 1x1 plane
+});
+
+someTraversable.append( hitregion );
+
+if( hitregion.test( coords: vec2 ) ) console.log( 'hit!' );
+
+```
 
 
 ### License

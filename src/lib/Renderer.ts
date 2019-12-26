@@ -53,10 +53,8 @@ export default class Renderer {
 	}
 
 
-	public render( scene: Scene, camera: Camera, frameBuffer?: Framebuffer ) {
+	public render( scene: Scene, frameBuffer?: Framebuffer ) {
 		if ( this.autoClear ) this.clear();
-
-		camera.updateMatrices();
 
 		this.gl.viewport( 0, 0, this.width, this.height );
 
@@ -69,7 +67,7 @@ export default class Renderer {
 		this.gl.enable( this.gl.DEPTH_TEST );
 		this.gl.enable( this.gl.BLEND );
 
-		scene.render( this.gl, camera.viewMatrix, camera.projectionMatrix );
+		scene.render( this.gl );
 	}
 
 

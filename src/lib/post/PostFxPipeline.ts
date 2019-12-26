@@ -3,7 +3,6 @@ import Renderer from '../Renderer';
 import Framebuffer from './Framebuffer';
 import Material from '../Material';
 import Scene from '../Scene';
-import { Camera } from '../camera/GenericCamera';
 
 
 interface PostFxPipelineProps {
@@ -19,7 +18,7 @@ type PostFxPipelineStep =
 	Material |
 	Framebuffer |
 	Framebuffer[] |
-	{ scene: Scene, camera: Camera };
+	Scene;
 
 
 const getFramebufferFromPipelineStep = ( step: PostFxPipelineStep, multiple: boolean = false ) => {
@@ -129,8 +128,8 @@ export default class PostFxPipeline {
 				this.renderer.renderDirect( this.tri, step, writeBuffer );
 
 				this.swapBuffers();
-			} else if ( 'scene' in step ) {
-				this.renderer.render( step.scene, step.camera, writeBuffer );
+			} else if ( 'isScene' in step ) {
+				this.renderer.render( step, writeBuffer );
 				this.swapBuffers();
 			}
 		});

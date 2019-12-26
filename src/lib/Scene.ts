@@ -5,6 +5,7 @@ import TransformNode from './TransformNode';
 import Renderable from './Renderable';
 import UniformProivder from './UniformProvider';
 import HitRegion from './hitRegion/GenericHitRegion';
+import { Camera } from './camera/GenericCamera';
 
 
 type RenderTask = {
@@ -18,6 +19,8 @@ export default class Scene extends Traversable {
 	private worldMatrix = mat4.create();
 	private renderQueue: RenderTask[] = [];
 	private shouldRebuildSceneGraph: boolean = true;
+	public activeCamera: Camera;
+	public readonly isScene = true;
 
 
 	static queueRenderables(
@@ -156,10 +159,20 @@ export default class Scene extends Traversable {
 
 	public render(
 		gl: WebGLRenderingContext,
-		viewMatrix: mat4,
-		projectionMatrix: mat4,
 	) {
 		Scene.calculateTransforms( this, this.worldMatrix );
+		if ( !this.activeCamera ) {
+			console.warn( 'Scene: No active camera provided.' );
+
+			return;
+		}
+
+		this.activeCamera.updateMatrices();
+
+		const {
+			viewMatrix,
+			projectionMatrix,
+		} = this.activeCamera;
 
 		if ( this.shouldRebuildSceneGraph ) {
 			this.renderQueue = [];

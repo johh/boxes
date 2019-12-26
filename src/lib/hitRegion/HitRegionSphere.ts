@@ -31,6 +31,8 @@ export default class HitRegionSphere extends GenericHitRegion implements HitRegi
 
 
 	public test( coords: vec2 ): number {
+		if ( !this.scene ) return 0;
+
 		const { projectionMatrix, viewMatrix, aspect } = this.scene.activeCamera;
 
 		vec4.set( vert, 0, 0, 0, 1 );

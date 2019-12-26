@@ -45,6 +45,8 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 
 
 	public test( coords: vec2 ): boolean {
+		if ( !this.scene ) return false;
+
 		const { projectionMatrix, viewMatrix } = this.scene.activeCamera;
 
 		mat4.mul( this.matrix, projectionMatrix, viewMatrix );

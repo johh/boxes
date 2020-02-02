@@ -135,6 +135,7 @@ const obj1 = new Renderable({
 	visible: true,
 	maskOnly: false,
 	mask: new Renderable(...),
+	layer: 0,
 });
 
 ```
@@ -186,6 +187,7 @@ import { Scene } from '@downpourdigital/boxes';
 
 const scene = new Scene();
 scene.activeCamera = someCamera; // set active camera to render from
+scene.activeLayer = someNumber; // set layer to be rendered, undefined for all layers
 scene.append( child ); // append renderable or another transform node
 scene.remove( child );
 ```

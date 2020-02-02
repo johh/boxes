@@ -17,6 +17,7 @@ interface RenderableProps extends TransformNodeProps {
 	mask?: Traversable;
 	blending?: BlendType;
 	renderOrder?: number;
+	layer?: number;
 }
 
 
@@ -27,6 +28,7 @@ export default class Renderable extends TransformNode {
 	public depthTest: boolean;
 	public depthWrite: boolean;
 	public mask: Traversable;
+	public layer: number | undefined;
 	public blending: BlendType;
 	public renderOrder: number;
 
@@ -38,6 +40,7 @@ export default class Renderable extends TransformNode {
 			geometry,
 			material,
 			mask,
+			layer,
 			depthTest = true,
 			depthWrite = true,
 			blending = 'normal',
@@ -49,6 +52,7 @@ export default class Renderable extends TransformNode {
 		this.depthTest = depthTest;
 		this.depthWrite = depthWrite;
 		this.mask = mask;
+		this.layer = layer;
 		this.blending = blending;
 		this.renderOrder = renderOrder;
 

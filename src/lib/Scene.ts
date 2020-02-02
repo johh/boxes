@@ -12,6 +12,7 @@ type RenderTask = {
 	task?: ( gl: WebGLRenderingContext, view: mat4, projection: mat4 ) => void;
 	order: number;
 	subtasks?: RenderTask[];
+	layer: number;
 };
 
 
@@ -20,6 +21,7 @@ export default class Scene extends Traversable {
 	private renderQueue: RenderTask[] = [];
 	private shouldRebuildSceneGraph: boolean = true;
 	public activeCamera: Camera;
+	public activeLayer: number | undefined;
 	public readonly isScene = true;
 
 
@@ -29,10 +31,14 @@ export default class Scene extends Traversable {
 		renderQueue: RenderTask[],
 		uniformProviders: UniformProivder[],
 		queueMasks: boolean = false,
+		parentLayer: number | undefined,
 	) {
-		const processChildren = ( _uniformProviders = uniformProviders ) => {
+		const processChildren = (
+			_parentLayer = parentLayer,
+			_uniformProviders = uniformProviders,
+			) => {
 			node.children.forEach( ( child ) => {
-				Scene.queueRenderables( gl, child, renderQueue, _uniformProviders, queueMasks );
+				Scene.queueRenderables( gl, child, renderQueue, _uniformProviders, queueMasks, _parentLayer );
 			});
 		};
 
@@ -40,6 +46,8 @@ export default class Scene extends Traversable {
 			if (
 				'isRenderable' in node
 			) {
+				const layer = node.layer || parentLayer;
+
 				const renderNode = (
 					view: mat4,
 					projection: mat4,
@@ -53,6 +61,7 @@ export default class Scene extends Traversable {
 					if ( node.mask ) {
 						const subtasks: RenderTask[] = [
 							{
+								layer,
 								order: -Infinity,
 								task: ( gl ) => {
 									gl.clear( gl.STENCIL_BUFFER_BIT );
@@ -65,6 +74,7 @@ export default class Scene extends Traversable {
 								},
 							},
 							{
+								layer,
 								order: Infinity,
 								task: ( gl, view, projection ) => {
 									gl.stencilFunc( gl.EQUAL, 1, 0xff );
@@ -79,15 +89,17 @@ export default class Scene extends Traversable {
 								},
 							},
 						];
-						Scene.queueRenderables( gl, node.mask, subtasks, uniformProviders, true );
+						Scene.queueRenderables( gl, node.mask, subtasks, uniformProviders, true, layer );
 						subtasks.sort( ( a, b ) => a.order - b.order );
 
 						renderQueue.push({
 							subtasks,
+							layer,
 							order: node.renderOrder,
 						});
 					} else {
 						renderQueue.push({
+							layer,
 							order: node.renderOrder,
 							task: ( gl, view, projection ) => {
 								renderNode( view, projection );
@@ -95,12 +107,13 @@ export default class Scene extends Traversable {
 						});
 					}
 
-					processChildren();
+					processChildren( layer );
 				}
 			} else if ( !node.maskOnly || queueMasks ) {
 				if ( node.onBeforeRender ) {
 					renderQueue.push({
 						order: 0,
+						layer: parentLayer,
 						task: () => node.onBeforeRender( node ),
 					});
 				}
@@ -109,7 +122,7 @@ export default class Scene extends Traversable {
 					const childProviders = uniformProviders.slice( 0 );
 					childProviders.push( node );
 
-					processChildren( childProviders );
+					processChildren( parentLayer, childProviders );
 				} else {
 					processChildren();
 				}
@@ -118,9 +131,19 @@ export default class Scene extends Traversable {
 	}
 
 
-	static runRecursive( task: RenderTask, gl: WebGLRenderingContext, view: mat4, projection: mat4 ) {
-		if ( task.task ) task.task( gl, view, projection );
-		if ( task.subtasks ) task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection ) );
+	static runRecursive(
+		task: RenderTask,
+		gl: WebGLRenderingContext,
+		view: mat4,
+		projection: mat4,
+		layer: number | undefined,
+	) {
+		if ( layer === undefined || task.layer === layer ) {
+			if ( task.task ) task.task( gl, view, projection );
+			if ( task.subtasks ) {
+				task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection, layer ) );
+			}
+		}
 	}
 
 
@@ -175,15 +198,16 @@ export default class Scene extends Traversable {
 			viewMatrix,
 			projectionMatrix,
 		} = this.activeCamera;
+		const layer = this.activeLayer;
 
 		if ( this.shouldRebuildSceneGraph ) {
 			this.renderQueue = [];
-			Scene.queueRenderables( gl, this, this.renderQueue, []);
+			Scene.queueRenderables( gl, this, this.renderQueue, [], false, 0 );
 
 			this.shouldRebuildSceneGraph = false;
 		}
 
 		this.renderQueue.sort( ( a, b ) => a.order - b.order );
-		this.renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix ) );
+		this.renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix, layer ) );
 	}
 }

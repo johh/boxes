@@ -19,6 +19,7 @@ export { default as HitRegionSphere } from './lib/hitRegion/HitRegionSphere';
 export { default as HitRegionPolygon } from './lib/hitRegion/HitRegionPolygon';
 
 export { default as ImageTexture } from './lib/texture/ImageTexture';
+export { default as GenericTexture } from './lib/texture/GenericTexture';
 
 import * as float from './lib/math/float';
 import * as int from './lib/math/int';

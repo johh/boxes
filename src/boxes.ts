@@ -1,5 +1,7 @@
 
-export const enums = WebGLRenderingContext;
+export const enums = typeof WebGLRenderingContext !== 'undefined'
+	? WebGLRenderingContext
+	: {} as typeof WebGLRenderingContext;
 
 
 export { default as Renderer } from './lib/Renderer';

@@ -6,7 +6,6 @@ import {
 	fragmentShader as defaultFragShader,
 } from './defaultShaders';
 import { Texture } from './texture/GenericTexture';
-import { isObject } from 'util';
 
 
 interface MaterialProps {
@@ -243,7 +242,7 @@ export default class Material {
 			switch ( ref.type ) {
 			case WebGLRenderingContext.SAMPLER_2D:
 			case WebGLRenderingContext.SAMPLER_CUBE:
-				if ( isObject( value ) && 'isTexture' in ( value as any ) ) {
+				if ( typeof value === 'object' && 'isTexture' in ( value as any ) ) {
 					this.textures[ref.value[0]] = value as Texture;
 				} else {
 					ref.value = value as Int32Array;

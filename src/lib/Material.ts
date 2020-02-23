@@ -211,10 +211,10 @@ export default class Material {
 		const gl = this.gl;
 
 		this.textures.forEach( ( texture, i ) => {
+			gl.activeTexture( gl.TEXTURE0 + i );
+
 			if ( texture !== null ) {
 				const textureLoc = texture.prepare( gl );
-
-				gl.activeTexture( gl.TEXTURE0 + i );
 				gl.bindTexture( gl.TEXTURE_2D, textureLoc );
 			}
 		});

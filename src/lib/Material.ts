@@ -105,6 +105,7 @@ export default class Material {
 	private gl: WebGLRenderingContext;
 	private program: WebGLProgram;
 	private uniforms = new Map<string, UniformReference>();
+	private attributeLocations = new Map<string, number>();
 	private queuedUniforms: UniformList = {};
 	private textures: Texture[] = [];
 	public readonly isMaterial = true;
@@ -124,10 +125,10 @@ export default class Material {
 	}
 
 
-	private compile( attributes: string[]) {
+	private compile() {
 		if ( this.program ) return this.program;
 
-		const cacheKey = this.vertexSrc + this.fragmentSrc + attributes.join( ',' );
+		const cacheKey = this.vertexSrc + this.fragmentSrc;
 
 		if ( programCache.has( cacheKey ) ) {
 			this.program = programCache.get( cacheKey );
@@ -141,8 +142,6 @@ export default class Material {
 
 			gl.attachShader( this.program, vertexShader );
 			gl.attachShader( this.program, fragmentShader );
-
-			this.mapAttributes( attributes );
 
 			gl.linkProgram( this.program );
 
@@ -163,12 +162,15 @@ export default class Material {
 	}
 
 
-	private mapAttributes( attributes: string[]) {
+	public getAttributeLocation( name: string ) {
 		const gl = this.gl;
 
-		attributes.forEach( ( name, i ) => {
-			gl.bindAttribLocation( this.program, i, name );
-		});
+		if ( this.attributeLocations.has( name ) ) return this.attributeLocations.get( name );
+
+		const loc = gl.getAttribLocation( this.program, name );
+		this.attributeLocations.set( name, loc );
+
+		return loc;
 	}
 
 
@@ -221,10 +223,10 @@ export default class Material {
 	}
 
 
-	public use( gl: WebGLRenderingContext, attributes: string[] = []) {
+	public use( gl: WebGLRenderingContext ) {
 		this.gl = gl;
 
-		gl.useProgram( this.compile( attributes ) );
+		gl.useProgram( this.compile() );
 		this.commitUniforms();
 		this.bindTextures();
 	}

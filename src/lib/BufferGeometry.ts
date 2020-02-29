@@ -1,4 +1,6 @@
 import { TriangleDrawMode } from './Enums';
+import Material from './Material';
+
 
 interface BufferGeometryProps {
 	verts: number[];
@@ -15,18 +17,25 @@ type BufferAttributeList = {
 };
 
 
+type BufferAttributeReference = {
+	name: string,
+	size: number,
+	offset: number,
+};
+
+
 export default class BufferGeometry {
 	protected verts: number[];
-	protected attributes: BufferAttributeList;
+	protected inputAttributes: BufferAttributeList;
+	protected attributes: BufferAttributeReference[];
 	protected bufferData: Float32Array;
 	protected buffer: WebGLBuffer;
 	protected indices: Uint16Array;
 	protected indexBuffer: WebGLBuffer;
 	protected mode: TriangleDrawMode;
 	protected stride: number;
-	public attributeNames: string[];
+	protected vertexName: string;
 	private gl: WebGLRenderingContext;
-	private attributeSetupFunctions: Function[] = [];
 
 	constructor( props: BufferGeometryProps ) {
 		const {
@@ -41,8 +50,8 @@ export default class BufferGeometry {
 		this.verts = verts;
 		this.mode = mode;
 		this.stride = stride;
-		this.attributes = attributes;
-		this.attributeNames = [vertexName, ...Object.keys( attributes )];
+		this.inputAttributes = attributes;
+		this.vertexName = vertexName;
 
 		if ( indices ) this.indices = new Uint16Array( indices );
 	}
@@ -54,21 +63,36 @@ export default class BufferGeometry {
 		const gl = this.gl;
 
 		let data = [].concat( this.verts );
-		const sizes: number[] = [this.stride];
+		let offset = this.verts.length * 4;
+
+		this.attributes = [];
+		this.attributes.push({
+			name: this.vertexName,
+			size: this.stride,
+			offset: 0,
+		});
 
 
-		Object.values( this.attributes ).forEach( ( attribute, i ) => {
+		Object.keys( this.inputAttributes ).forEach( ( name ) => {
+			const attribute = this.inputAttributes[name];
+			const _offset = offset;
 			let size = attribute.length / ( this.verts.length / this.stride );
 
 			if ( size % 1 !== 0 ) {
-				console.warn( `[WEBGL] Unsupported attribute size in slot ${i}, filling with zeroes` );
+				console.warn( `[WEBGL] Unsupported attribute size for "${name}", filling with zeroes` );
 				size = 1;
 				data = data.concat( Array( this.verts.length / this.stride ).fill( 0 ) );
 			} else {
 				data = data.concat( attribute );
 			}
 
-			sizes.push( size );
+			this.attributes.push({
+				name,
+				size,
+				offset: _offset,
+			});
+
+			offset += ( this.verts.length / this.stride ) * size * 4;
 		});
 
 		this.bufferData = new Float32Array( data );
@@ -76,20 +100,6 @@ export default class BufferGeometry {
 		this.buffer = gl.createBuffer();
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
 		gl.bufferData( gl.ARRAY_BUFFER, this.bufferData, gl.STATIC_DRAW );
-
-		let offset = 0;
-
-		sizes.forEach( ( size, i ) => {
-			const _offset = offset;
-
-			this.attributeSetupFunctions.push( () => {
-				gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
-				gl.enableVertexAttribArray( i );
-				gl.vertexAttribPointer( i, size, gl.FLOAT, false, 0, _offset );
-			});
-
-			offset += ( this.verts.length / this.stride ) * size * 4;
-		});
 
 
 		if ( this.indices ) {
@@ -104,16 +114,24 @@ export default class BufferGeometry {
 	}
 
 
-	private prepare() {
-		this.attributeSetupFunctions.forEach( f => f() );
+	private prepare( material: Material ) {
+		const gl = this.gl;
+
+		this.attributes.forEach( ( attribute ) => {
+			const index = material.getAttributeLocation( attribute.name );
+
+			gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+			gl.enableVertexAttribArray( index );
+			gl.vertexAttribPointer( index, attribute.size, gl.FLOAT, false, 0, attribute.offset );
+		});
 	}
 
 
-	public draw( gl: WebGLRenderingContext ) {
+	public draw( gl: WebGLRenderingContext, material: Material ) {
 		this.gl = gl;
 
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload() );
-		this.prepare();
+		this.prepare( material );
 
 		if ( this.indices ) {
 			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );

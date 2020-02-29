@@ -78,8 +78,8 @@ export default class Renderer {
 			this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, null );
 		}
 
-		material.use( this.gl, geometry.attributeNames );
-		geometry.draw( this.gl );
+		material.use( this.gl );
+		geometry.draw( this.gl, material );
 	}
 
 

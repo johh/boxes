@@ -81,8 +81,8 @@ export default class Renderable extends TransformNode {
 			break;
 		}
 
-		this.material.use( gl, this.geometry.attributeNames );
-		this.geometry.draw( gl );
+		this.material.use( gl );
+		this.geometry.draw( gl, this.material );
 
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( true );

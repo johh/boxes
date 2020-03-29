@@ -14,6 +14,7 @@ interface RenderableProps extends TransformNodeProps {
 	material: Material;
 	depthTest?: boolean;
 	depthWrite?: boolean;
+	flipFaces?: boolean;
 	mask?: Traversable;
 	blending?: BlendType;
 	renderOrder?: number;
@@ -27,6 +28,7 @@ export default class Renderable extends TransformNode {
 	public material: Material;
 	public depthTest: boolean;
 	public depthWrite: boolean;
+	public flipFaces: boolean;
 	public mask: Traversable;
 	public layer: number | undefined;
 	public blending: BlendType;
@@ -43,6 +45,7 @@ export default class Renderable extends TransformNode {
 			layer,
 			depthTest = true,
 			depthWrite = true,
+			flipFaces = false,
 			blending = 'normal',
 			renderOrder = 0,
 		} = props;
@@ -51,6 +54,7 @@ export default class Renderable extends TransformNode {
 		this.material = material;
 		this.depthTest = depthTest;
 		this.depthWrite = depthWrite;
+		this.flipFaces = flipFaces;
 		this.mask = mask;
 		this.layer = layer;
 		this.blending = blending;
@@ -70,6 +74,7 @@ export default class Renderable extends TransformNode {
 
 		if ( !this.depthTest ) gl.disable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( false );
+		if ( this.flipFaces ) gl.cullFace( gl.FRONT );
 
 		switch ( this.blending ) {
 		case 'additive':
@@ -86,6 +91,7 @@ export default class Renderable extends TransformNode {
 
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( true );
+		if ( this.flipFaces ) gl.cullFace( gl.BACK );
 	}
 
 

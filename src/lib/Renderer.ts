@@ -15,6 +15,7 @@ interface RendererPops {
 	transparency?: boolean;
 	clearColor?: Color;
 	autoClear?: boolean;
+	cullFaces?: boolean;
 }
 
 
@@ -25,6 +26,7 @@ export default class Renderer {
 	public height: number;
 	public clearColor: Color;
 	public autoClear: boolean;
+	public cullFaces: boolean;
 
 
 	constructor( props: RendererPops ) {
@@ -35,11 +37,13 @@ export default class Renderer {
 			transparency = false,
 			clearColor = [0, 0, 0, 1] as Color,
 			autoClear = true,
+			cullFaces = true,
 		} = props;
 
 		this.gl = canvas.getContext( 'webgl', { alpha: transparency, stencil: true });
 		this.clearColor = clearColor;
 		this.autoClear = autoClear;
+		this.cullFaces = cullFaces;
 
 		this.setSize( width, height );
 	}
@@ -66,6 +70,11 @@ export default class Renderer {
 
 		this.gl.enable( this.gl.DEPTH_TEST );
 		this.gl.enable( this.gl.BLEND );
+
+		if ( this.cullFaces ) {
+			this.gl.enable( this.gl.CULL_FACE );
+			this.gl.cullFace( this.gl.BACK );
+		}
 
 		scene.render( this.gl );
 	}

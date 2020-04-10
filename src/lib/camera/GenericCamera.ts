@@ -8,9 +8,9 @@ export default class GenericCamera extends TransformNode {
 	public viewMatrix: mat4 = mat4.create();
 
 
-	public updateMatrices() {
-		this.updateLocalMatrix();
-		this.viewMatrix = mat4.invert( this.viewMatrix, this.localMatrix );
+	public updateMatrices( parentWorldMatrix?: mat4 ) {
+		super.updateMatrices( parentWorldMatrix );
+		this.viewMatrix = mat4.invert( this.viewMatrix, this.worldMatrix );
 	}
 }
 

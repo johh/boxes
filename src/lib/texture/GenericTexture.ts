@@ -25,6 +25,11 @@ export interface GenericTextureProps {
 	mipmaps?: boolean;
 	wrapS?: WrappingType;
 	wrapT?: WrappingType;
+	initial?: {
+		data: Uint8Array,
+		width?: number,
+		height?: number,
+	};
 }
 
 
@@ -43,6 +48,9 @@ export default class GenericTexture implements Texture {
 	private wrapS: WrappingType;
 	private wrapT: WrappingType;
 	private textureData: TexImageSource;
+	private initalData: Uint8Array;
+	private initialWidth: number;
+	private initialHeight: number;
 	protected needsUpdate: boolean = false;
 	public readonly isTexture = true;
 
@@ -54,6 +62,11 @@ export default class GenericTexture implements Texture {
 			mipmaps = false,
 			wrapS = WebGLRenderingContext.CLAMP_TO_EDGE,
 			wrapT = WebGLRenderingContext.CLAMP_TO_EDGE,
+			initial: {
+				data = undefined,
+				width = 1,
+				height = 1,
+			} = {},
 		} = props;
 
 		this.format = format;
@@ -61,6 +74,26 @@ export default class GenericTexture implements Texture {
 		this.mipmaps = mipmaps;
 		this.wrapS = wrapS;
 		this.wrapT = wrapT;
+		this.initialWidth = width;
+		this.initialHeight = height;
+
+		if ( data ) {
+			this.initalData = data;
+		} else {
+			switch ( this.format ) {
+			case WebGLRenderingContext.RGBA:
+				this.initalData = new Uint8Array([0, 0, 0, 255]);
+				break;
+			case WebGLRenderingContext.RGB:
+				this.initalData = new Uint8Array([0, 0, 0]);
+				break;
+			case WebGLRenderingContext.LUMINANCE_ALPHA:
+				this.initalData = new Uint8Array([0, 0]);
+				break;
+			default:
+				this.initalData = new Uint8Array([0]);
+			}
+		}
 	}
 
 
@@ -68,34 +101,18 @@ export default class GenericTexture implements Texture {
 		if ( !this.texture ) {
 			this.gl = gl;
 
-			let data: Uint8Array;
-
-			switch ( this.format ) {
-			case WebGLRenderingContext.RGBA:
-				data = new Uint8Array([0, 0, 0, 255]);
-				break;
-			case WebGLRenderingContext.RGB:
-				data = new Uint8Array([0, 0, 0]);
-				break;
-			case WebGLRenderingContext.LUMINANCE_ALPHA:
-				data = new Uint8Array([0, 0]);
-				break;
-			default:
-				data = new Uint8Array([0]);
-			}
-
 			this.texture = gl.createTexture();
 			gl.bindTexture( gl.TEXTURE_2D, this.texture );
 			gl.texImage2D(
 				gl.TEXTURE_2D,
 				0,
 				this.format,
-				1,
-				1,
+				this.initialWidth,
+				this.initialHeight,
 				0,
 				this.format,
 				this.type,
-				data,
+				this.initalData,
 			);
 			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS );
 			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT );

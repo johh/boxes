@@ -99,6 +99,12 @@ export default class PostFxPipeline {
 
 
 	public render( list: PostFxPipelineStep[]) {
+		// reset blend mode before rendering
+		this.renderer.gl.blendFunc(
+			this.renderer.gl.SRC_ALPHA,
+			this.renderer.gl.ONE_MINUS_SRC_ALPHA,
+		);
+
 		list.forEach( ( step, i ) => {
 			let readBuffers: Framebuffer[] = [this.fboA];
 

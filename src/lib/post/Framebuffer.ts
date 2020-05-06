@@ -1,4 +1,5 @@
 import Renderer from '../Renderer';
+import { Texture } from '../texture/GenericTexture';
 
 
 interface FramebufferProps {
@@ -10,7 +11,7 @@ interface FramebufferProps {
 }
 
 
-export default class Framebuffer {
+export default class Framebuffer implements Texture {
 	private gl: WebGLRenderingContext;
 	private fbo: WebGLFramebuffer;
 	private depthBuffer: WebGLRenderbuffer;
@@ -20,6 +21,7 @@ export default class Framebuffer {
 	public height: number;
 	public width: number;
 	public readonly isFramebuffer = true;
+	public readonly isTexture = true;
 
 
 	constructor( props: FramebufferProps ) {
@@ -131,6 +133,11 @@ export default class Framebuffer {
 	public use() {
 		this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, this.fbo );
 		this.gl.viewport( 0, 0, this.width, this.height );
+	}
+
+
+	public prepare() {
+		return this.texture;
 	}
 
 

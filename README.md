@@ -70,7 +70,7 @@ const material = new Material({
 	fragmentShader: '...',
 	uniforms: {
 		u_vYourUniform: vec4.fromValues( .5, 0, 1, 1 ),
-		u_vYourTexture: new ImageTexture(...),
+		u_vYourTexture: new ImageTexture(...), // or Framebuffer
 	}
 });
 
@@ -234,6 +234,11 @@ const texture = new ImageTexture({
 	format: enums.RGBA,
 	type: enums.UNSIGNED_BYTE,
 	mipmaps: false,
+	initial: { // initial buffer value, before the actual texture is loaded
+		data: new Uint8Array([0, 0, 0, 255]),
+		width: 1,
+		height: 1,
+	},
 });
 ```
 
@@ -333,4 +338,4 @@ if( hitregion.test( coords: vec2 ) ) console.log( 'hit!' );
 
 
 ### License
-© 2019 [DOWNPOUR DIGITAL](https://downpour.digital), licensed under BSD-4-Clause
+© 2020 [DOWNPOUR DIGITAL](https://downpour.digital), licensed under BSD-4-Clause

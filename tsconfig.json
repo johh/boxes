@@ -11,7 +11,7 @@
 		"esModuleInterop": false,
 		"removeComments": true,
 		"lib": [
-			"es2015",
+			"ES2017",
 			"dom",
 			"webworker",
 		],

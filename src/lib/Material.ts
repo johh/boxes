@@ -275,7 +275,7 @@ export default class Material {
 			const ref = this.uniforms.get( key );
 
 			if ( ref.value !== null ) {
-				ref.value = func( ref.value ) || ref.value;
+				ref.value = ( func( ref.value ) || ref.value ) as any;
 			} else {
 				console.warn( `cannot update uninitialized uniform ${key} – call setUniform first.` );
 			}

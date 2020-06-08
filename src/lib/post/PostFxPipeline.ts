@@ -11,6 +11,7 @@ interface PostFxPipelineProps {
 	height?: number;
 	depth?: boolean;
 	stencil?: boolean;
+	skipFboGeneration?: boolean;
 }
 
 
@@ -67,25 +68,23 @@ export default class PostFxPipeline {
 			height = renderer.height,
 			depth = false,
 			stencil = false,
+			skipFboGeneration = false,
 		} = props;
 
 		this.renderer = renderer;
 
-		this.fboA = new Framebuffer({
-			renderer,
-			width,
-			height,
-			depth,
-			stencil,
-		});
+		if( !skipFboGeneration ){
+			const opts = {
+				renderer,
+				width,
+				height,
+				depth,
+				stencil,
+			};
 
-		this.fboB = new Framebuffer({
-			renderer,
-			width,
-			height,
-			depth,
-			stencil,
-		});
+			this.fboA = new Framebuffer(opts);
+			this.fboB = new Framebuffer(opts);
+		}
 	}
 
 

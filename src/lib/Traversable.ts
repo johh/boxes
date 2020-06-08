@@ -27,10 +27,11 @@ export default class Traversable {
 	}
 
 
-	public append( child: Traversable ) {
+	public append( child: Traversable ): void {
 		if ( child.parent && child.parent !== this ) child.parent.remove( child );
 		if ( !this.children.includes( child ) ) {
 			this.children.push( child );
+			// eslint-disable-next-line no-param-reassign
 			child.parent = this;
 
 			this.invalidateSceneGraph();
@@ -38,9 +39,10 @@ export default class Traversable {
 	}
 
 
-	public remove( child: Traversable ) {
+	public remove( child: Traversable ): void {
 		if ( this.children.includes( child ) ) {
 			this.children.splice( this.children.findIndex( c => c === child ), 1 );
+			// eslint-disable-next-line no-param-reassign
 			child.parent = null;
 
 			this.invalidateSceneGraph();
@@ -48,19 +50,19 @@ export default class Traversable {
 	}
 
 
-	public hide() {
+	public hide(): void {
 		this.visible = false;
 		this.invalidateSceneGraph();
 	}
 
 
-	public unhide() {
+	public unhide(): void {
 		this.visible = true;
 		this.invalidateSceneGraph();
 	}
 
 
-	public invalidateSceneGraph() {
+	public invalidateSceneGraph(): void {
 		if ( this.parent ) this.parent.invalidateSceneGraph();
 	}
 }

@@ -1,4 +1,7 @@
-import { vec2, vec3, vec4, mat4, mat3, mat2 } from 'gl-matrix';
+/* eslint-disable indent */
+import {
+	vec2, vec3, vec4, mat4, mat3, mat2,
+} from 'gl-matrix';
 
 import { UniformValue, InternalUniformValue } from './UniformValue';
 import {
@@ -42,12 +45,17 @@ interface UniformReference {
 const programCache = new Map<string, WebGLProgram>();
 
 
-const createShader = ( gl: WebGLRenderingContext, src: string, frag: Boolean ) => {
+const createShader = (
+	gl: WebGLRenderingContext,
+	src: string,
+	frag: boolean,
+): WebGLShader => {
 	const shader = gl.createShader( frag ? gl.FRAGMENT_SHADER : gl.VERTEX_SHADER );
 	gl.shaderSource( shader, src );
 	gl.compileShader( shader );
 
 	if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+		// eslint-disable-next-line no-console
 		console.error( '[WEBGL] Shader compilation failed:', gl.getShaderInfoLog( shader ) );
 	}
 
@@ -55,46 +63,56 @@ const createShader = ( gl: WebGLRenderingContext, src: string, frag: Boolean ) =
 };
 
 
+type SetterFunction = ( value: unknown ) => void;
 const getSetterFunction = (
 	gl: WebGLRenderingContext,
 	location: WebGLUniformLocation,
 	type: number,
-) => {
+): SetterFunction => {
 	switch ( type ) {
 	case gl.FLOAT:
-		return ( value: Float32Array ) => gl.uniform1fv( location, value );
+		return ( value: Float32Array ): void => gl.uniform1fv( location, value );
 
 	case gl.FLOAT_VEC2:
-		return ( value: vec2 | Float32Array ) => gl.uniform2fv( location, value );
+		return ( value: vec2 | Float32Array ): void => gl.uniform2fv( location, value );
 
 	case gl.FLOAT_VEC3:
-		return ( value: vec3 | Float32Array ) => gl.uniform3fv( location, value );
+		return ( value: vec3 | Float32Array ): void => gl.uniform3fv( location, value );
 
 	case gl.FLOAT_VEC4:
-		return ( value: vec4 | Float32Array ) => gl.uniform4fv( location, value );
+		return ( value: vec4 | Float32Array ): void => gl.uniform4fv( location, value );
 
 	case gl.INT:
 	case gl.SAMPLER_2D:
 	case gl.SAMPLER_CUBE:
-		return ( value: Int32Array ) => gl.uniform1iv( location, value );
+		return ( value: Int32Array ): void => gl.uniform1iv( location, value );
 
 	case gl.INT_VEC2:
-		return ( value: Int32Array ) => gl.uniform2iv( location, value );
+		return ( value: Int32Array ): void => gl.uniform2iv( location, value );
 
 	case gl.INT_VEC3:
-		return ( value: Int32Array ) => gl.uniform3iv( location, value );
+		return ( value: Int32Array ): void => gl.uniform3iv( location, value );
 
 	case gl.INT_VEC4:
-		return ( value: Int32Array ) => gl.uniform4iv( location, value );
+		return ( value: Int32Array ): void => gl.uniform4iv( location, value );
 
 	case gl.FLOAT_MAT2:
-		return ( value: mat2 | Float32Array ) => gl.uniformMatrix2fv( location, false, value );
+		return (
+			value: mat2 | Float32Array,
+		): void => gl.uniformMatrix2fv( location, false, value );
 
 	case gl.FLOAT_MAT3:
-		return ( value: mat3 | Float32Array ) => gl.uniformMatrix3fv( location, false, value );
+		return (
+			value: mat3 | Float32Array,
+		): void => gl.uniformMatrix3fv( location, false, value );
 
 	case gl.FLOAT_MAT4:
-		return ( value: mat4 | Float32Array ) => gl.uniformMatrix4fv( location, false, value );
+		return (
+			value: mat4 | Float32Array,
+		): void => gl.uniformMatrix4fv( location, false, value );
+
+	default:
+		return (): void => {};
 	}
 };
 
@@ -125,7 +143,7 @@ export default class Material {
 	}
 
 
-	private compile() {
+	private compile(): WebGLProgram {
 		if ( this.program ) return this.program;
 
 		const cacheKey = this.vertexSrc + this.fragmentSrc;
@@ -133,7 +151,7 @@ export default class Material {
 		if ( programCache.has( cacheKey ) ) {
 			this.program = programCache.get( cacheKey );
 		} else {
-			const gl = this.gl;
+			const { gl } = this;
 
 			const vertexShader = createShader( gl, this.vertexSrc, false );
 			const fragmentShader = createShader( gl, this.fragmentSrc, true );
@@ -146,7 +164,10 @@ export default class Material {
 			gl.linkProgram( this.program );
 
 			if ( !gl.getProgramParameter( this.program, gl.LINK_STATUS ) ) {
-				console.error( '[WEBGL] Program linking failed:', gl.getProgramInfoLog( this.program ) );
+				// eslint-disable-next-line no-console
+				console.error(
+					'[WEBGL] Program linking failed:', gl.getProgramInfoLog( this.program ),
+				);
 			}
 
 			gl.deleteShader( vertexShader );
@@ -162,8 +183,8 @@ export default class Material {
 	}
 
 
-	public getAttributeLocation( name: string ) {
-		const gl = this.gl;
+	public getAttributeLocation( name: string ): number {
+		const { gl } = this;
 
 		if ( this.attributeLocations.has( name ) ) return this.attributeLocations.get( name );
 
@@ -174,8 +195,8 @@ export default class Material {
 	}
 
 
-	private createUniformReferences() {
-		const gl = this.gl;
+	private createUniformReferences(): void {
+		const { gl } = this;
 
 		this.textures = [];
 
@@ -202,15 +223,15 @@ export default class Material {
 	}
 
 
-	private commitUniforms() {
-		this.uniforms.forEach( ( ref, key ) => {
+	private commitUniforms(): void {
+		this.uniforms.forEach( ( ref ) => {
 			if ( ref.value ) ref.setterFunction( ref.value );
 		});
 	}
 
 
-	private bindTextures() {
-		const gl = this.gl;
+	private bindTextures(): void {
+		const { gl } = this;
 
 		this.textures.forEach( ( texture, i ) => {
 			gl.activeTexture( gl.TEXTURE0 + i );
@@ -223,7 +244,7 @@ export default class Material {
 	}
 
 
-	public use( gl: WebGLRenderingContext ) {
+	public use( gl: WebGLRenderingContext ): void {
 		this.gl = gl;
 
 		gl.useProgram( this.compile() );
@@ -232,7 +253,7 @@ export default class Material {
 	}
 
 
-	public setUniform( key: string, value: UniformValue ) {
+	public setUniform( key: string, value: UniformValue ): void {
 		if ( !this.gl ) {
 			this.queuedUniforms[key] = value;
 			return;
@@ -244,7 +265,7 @@ export default class Material {
 			switch ( ref.type ) {
 			case WebGLRenderingContext.SAMPLER_2D:
 			case WebGLRenderingContext.SAMPLER_CUBE:
-				if ( typeof value === 'object' && 'isTexture' in ( value as any ) ) {
+				if ( typeof value === 'object' && 'isTexture' in value ) {
 					this.textures[ref.value[0]] = value as Texture;
 				} else {
 					ref.value = value as Int32Array;
@@ -263,41 +284,44 @@ export default class Material {
 	}
 
 
-	public setUniforms( list: UniformList ) {
+	public setUniforms( list: UniformList ): void {
 		Object.keys( list ).forEach( ( key ) => {
 			this.setUniform( key, list[key]);
 		});
 	}
 
 
-	public updateUniform( key: string, func: UniformUpdateFunction ) {
+	public updateUniform( key: string, func: UniformUpdateFunction ): void {
 		if ( this.uniforms.has( key ) ) {
 			const ref = this.uniforms.get( key );
 
 			if ( ref.value !== null ) {
-				ref.value = ( func( ref.value ) || ref.value ) as any;
+				ref.value = ( func( ref.value ) || ref.value ) as Float32Array | Int32Array;
 			} else {
-				console.warn( `cannot update uninitialized uniform ${key} – call setUniform first.` );
+				// eslint-disable-next-line no-console
+				console.warn(
+					`cannot update uninitialized uniform ${key} – call setUniform first.`,
+				);
 			}
 		}
 	}
 
 
-	public updateUniforms( list: UniformUpdateList ) {
+	public updateUniforms( list: UniformUpdateList ): void {
 		Object.keys( list ).forEach( ( key ) => {
 			this.updateUniform( key, list[key]);
 		});
 	}
 
 
-	public getUniform( key: string ) {
+	public getUniform( key: string ): unknown {
 		if ( this.uniforms.has( key ) ) return this.uniforms.get( key ).value;
-		return undefined;
+		return null;
 	}
 
 
-	public delete() {
+	public delete(): void {
 		if ( this.program ) this.gl.deleteProgram( this.program );
-		this.program = undefined;
+		this.program = null;
 	}
 }

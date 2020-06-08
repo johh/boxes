@@ -46,7 +46,7 @@ export default class OrthoCamera extends GenericCamera implements Camera {
 	}
 
 
-	public updateProjectionMatrix() {
+	public updateProjectionMatrix(): void {
 		this.aspect = Math.abs( this.right - this.left ) / Math.abs( this.top - this.bottom );
 
 		mat4.ortho(

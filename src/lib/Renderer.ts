@@ -1,7 +1,7 @@
 import Scene from './Scene';
-import { Camera } from './camera/GenericCamera';
 import BufferGeometry from './BufferGeometry';
 import Material from './Material';
+// eslint-disable-next-line import/no-cycle
 import Framebuffer from './post/Framebuffer';
 
 
@@ -49,7 +49,7 @@ export default class Renderer {
 	}
 
 
-	public setSize( width: number, height: number ) {
+	public setSize( width: number, height: number ): void {
 		this.width = width;
 		this.height = height;
 		this.gl.canvas.width = width;
@@ -57,7 +57,7 @@ export default class Renderer {
 	}
 
 
-	public render( scene: Scene, frameBuffer?: Framebuffer ) {
+	public render( scene: Scene, frameBuffer?: Framebuffer ): void {
 		if ( this.autoClear ) this.clear();
 
 		this.gl.viewport( 0, 0, this.width, this.height );
@@ -80,7 +80,11 @@ export default class Renderer {
 	}
 
 
-	public renderDirect( geometry: BufferGeometry, material: Material, frameBuffer?: Framebuffer ) {
+	public renderDirect(
+		geometry: BufferGeometry,
+		material: Material,
+		frameBuffer?: Framebuffer,
+	): void {
 		if ( frameBuffer ) {
 			frameBuffer.use();
 		} else {
@@ -92,24 +96,27 @@ export default class Renderer {
 	}
 
 
-	public clear() {
+	public clear(): void {
 		this.gl.clearColor( ...this.clearColor );
-		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT );
+		this.gl.clear(
+			// eslint-disable-next-line no-bitwise
+			this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT,
+		);
 	}
 
 
-	public clearColorBuffer() {
+	public clearColorBuffer(): void {
 		this.gl.clearColor( ...this.clearColor );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 	}
 
 
-	public clearDepthBuffer() {
+	public clearDepthBuffer(): void {
 		this.gl.clear( this.gl.DEPTH_BUFFER_BIT );
 	}
 
 
-	public clearStencilBuffer() {
+	public clearStencilBuffer(): void {
 		this.gl.clear( this.gl.STENCIL_BUFFER_BIT );
 	}
 }

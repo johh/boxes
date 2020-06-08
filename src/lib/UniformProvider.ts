@@ -33,32 +33,32 @@ export default class UniformProvider extends Traversable {
 	}
 
 
-	public setUniform( key: string, value: UniformValue ) {
+	public setUniform( key: string, value: UniformValue ): void {
 		this.uniforms[key] = value;
 	}
 
 
-	public setUniforms( list: UniformList ) {
+	public setUniforms( list: UniformList ): void {
 		Object.keys( list ).forEach( ( key ) => {
 			this.setUniform( key, list[key]);
 		});
 	}
 
 
-	public updateUniform( key: string, func: UniformProviderUpdateFunction ) {
+	public updateUniform( key: string, func: UniformProviderUpdateFunction ): void {
 		this.uniforms[key] = func( this.uniforms[key]) || this.uniforms[key];
 	}
 
 
-	public updateUniforms( list: UniformProviderUpdateList ) {
+	public updateUniforms( list: UniformProviderUpdateList ): void {
 		Object.keys( list ).forEach( ( key ) => {
 			this.updateUniform( key, list[key]);
 		});
 	}
 
 
-	public applyUniformsToNode( node: Renderable ) {
-		if ( 'isRenderable' in node ) {
+	public applyUniformsToNode( node: Renderable ): void {
+		if ( 'isRenderable' in node ) {
 			node.material.setUniforms( this.uniforms );
 		}
 	}

@@ -1,4 +1,7 @@
 
+import * as float from './lib/math/float';
+import * as int from './lib/math/int';
+
 export const enums = typeof WebGLRenderingContext !== 'undefined'
 	? WebGLRenderingContext
 	: {} as typeof WebGLRenderingContext;
@@ -23,8 +26,7 @@ export { default as HitRegionPolygon } from './lib/hitRegion/HitRegionPolygon';
 export { default as ImageTexture } from './lib/texture/ImageTexture';
 export { default as GenericTexture } from './lib/texture/GenericTexture';
 
-import * as float from './lib/math/float';
-import * as int from './lib/math/int';
-
 export { int, float };
-export { vec2, vec3, vec4, mat3, mat4 } from 'gl-matrix';
+export {
+	vec2, vec3, vec4, mat3, mat4,
+} from 'gl-matrix';

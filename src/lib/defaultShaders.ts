@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* export const vertexShader = `
 	attribute vec3 a_vPosition;
 	attribute vec2 a_vUv;

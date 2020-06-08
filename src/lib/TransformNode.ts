@@ -30,7 +30,7 @@ export default class TransformNode extends Traversable {
 	}
 
 
-	public updateLocalMatrix() {
+	public updateLocalMatrix(): mat4 {
 		quat.fromEuler( this.quatRotation, this.rotation[0], this.rotation[1], this.rotation[2]);
 
 		mat4.fromRotationTranslationScaleOrigin(
@@ -45,7 +45,7 @@ export default class TransformNode extends Traversable {
 	}
 
 
-	public updateWorldMatrix( parentWorldMatrix?: mat4 ) {
+	public updateWorldMatrix( parentWorldMatrix?: mat4 ): void {
 		if ( parentWorldMatrix ) {
 			mat4.mul( this.worldMatrix, parentWorldMatrix, this.localMatrix );
 		} else {
@@ -54,7 +54,7 @@ export default class TransformNode extends Traversable {
 	}
 
 
-	public updateMatrices( parentWorldMatrix?: mat4 ) {
+	public updateMatrices( parentWorldMatrix?: mat4 ): void {
 		// TODO: check if localMatrix needs update
 		this.updateLocalMatrix();
 		this.updateWorldMatrix( parentWorldMatrix );

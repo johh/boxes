@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 type TextureFormat =
 	WebGLRenderingContext['RGB'] |
 	WebGLRenderingContext['RGBA'] |
@@ -26,9 +27,9 @@ export interface GenericTextureProps {
 	wrapS?: WrappingType;
 	wrapT?: WrappingType;
 	initial?: {
-		data: Uint8Array,
-		width?: number,
-		height?: number,
+		data: Uint8Array;
+		width?: number;
+		height?: number;
 	};
 }
 
@@ -51,19 +52,19 @@ export default class GenericTexture implements Texture {
 	private initalData: Uint8Array;
 	private initialWidth: number;
 	private initialHeight: number;
-	protected needsUpdate: boolean = false;
+	protected needsUpdate = false;
 	public readonly isTexture = true;
 
 
 	constructor( props: GenericTextureProps = {}) {
 		const {
 			format = WebGLRenderingContext.RGBA,
-			type =  WebGLRenderingContext.UNSIGNED_BYTE,
+			type = WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = false,
 			wrapS = WebGLRenderingContext.CLAMP_TO_EDGE,
 			wrapT = WebGLRenderingContext.CLAMP_TO_EDGE,
 			initial: {
-				data = undefined,
+				data,
 				width = 1,
 				height = 1,
 			} = {},
@@ -97,7 +98,7 @@ export default class GenericTexture implements Texture {
 	}
 
 
-	public prepare( gl: WebGLRenderingContext ) {
+	public prepare( gl: WebGLRenderingContext ): WebGLTexture {
 		if ( !this.texture ) {
 			this.gl = gl;
 
@@ -134,13 +135,13 @@ export default class GenericTexture implements Texture {
 	}
 
 
-	protected queueUpdate( data: TexImageSource ) {
+	protected queueUpdate( data: TexImageSource ): void {
 		this.textureData = data;
 		this.needsUpdate = true;
 	}
 
 
-	public update( data: TexImageSource ) {
+	public update( data: TexImageSource ): void {
 		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
 		this.gl.texImage2D(
 			this.gl.TEXTURE_2D,
@@ -156,9 +157,9 @@ export default class GenericTexture implements Texture {
 	}
 
 
-	public delete() {
+	public delete(): void {
 		if ( this.texture ) this.gl.deleteTexture( this.texture );
 
-		this.texture = undefined;
+		this.texture = null;
 	}
 }

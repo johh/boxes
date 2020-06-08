@@ -17,27 +17,33 @@ interface PostFxPipelineProps {
 
 type PostFxPipelineStep =
 	Material |
-	Framebuffer |
+	Framebuffer |
 	Framebuffer[] |
 	Scene;
 
 
-const getFramebufferFromPipelineStep = ( step: PostFxPipelineStep, multiple: boolean = false ) => {
+const getFramebufferFromPipelineStep = (
+	step: PostFxPipelineStep,
+	multiple = false,
+): Framebuffer | Framebuffer[] => {
 	if ( 'isFramebuffer' in step ) {
-		return multiple ? <Framebuffer[]>[step] : <Framebuffer>step;
+		return multiple ? [step] : step;
 	}
+
 	if (
 		Array.isArray( step )
-		&& ( <Framebuffer[]>step ).length > 0
+		&& step.length > 0
 	) {
 		if ( multiple ) {
-			return <Framebuffer[]>step;
+			return step;
 		}
 
-		if ( 'isFramebuffer' in ( <Framebuffer[]>step )[0]) {
-			return ( <Framebuffer[]>step )[0];
+		if ( 'isFramebuffer' in step[0]) {
+			return step[0];
 		}
 	}
+
+	return null;
 };
 
 
@@ -56,6 +62,7 @@ export default class PostFxPipeline {
 			],
 		},
 	});
+
 	private renderer: Renderer;
 	private fboA: Framebuffer;
 	private fboB: Framebuffer;
@@ -73,7 +80,7 @@ export default class PostFxPipeline {
 
 		this.renderer = renderer;
 
-		if( !skipFboGeneration ){
+		if ( !skipFboGeneration ) {
 			const opts = {
 				renderer,
 				width,
@@ -82,13 +89,13 @@ export default class PostFxPipeline {
 				stencil,
 			};
 
-			this.fboA = new Framebuffer(opts);
-			this.fboB = new Framebuffer(opts);
+			this.fboA = new Framebuffer( opts );
+			this.fboB = new Framebuffer( opts );
 		}
 	}
 
 
-	private swapBuffers() {
+	private swapBuffers(): void {
 		this.fboA.clear();
 
 		const temp = this.fboA;
@@ -97,7 +104,7 @@ export default class PostFxPipeline {
 	}
 
 
-	public render( list: PostFxPipelineStep[]) {
+	public render( list: PostFxPipelineStep[]): void {
 		// reset blend mode before rendering
 		this.renderer.gl.blendFunc(
 			this.renderer.gl.SRC_ALPHA,
@@ -110,7 +117,7 @@ export default class PostFxPipeline {
 			if ( list[i - 1]) {
 				const candidate = getFramebufferFromPipelineStep( list[i - 1], true );
 				if ( candidate ) {
-					readBuffers = <Framebuffer[]>candidate;
+					readBuffers = candidate as Framebuffer[];
 				}
 			}
 
@@ -118,16 +125,18 @@ export default class PostFxPipeline {
 
 			if ( list[i + 1]) {
 				const candidate = getFramebufferFromPipelineStep( list[i + 1]);
-				writeBuffer = <Framebuffer>candidate || this.fboB;
+				writeBuffer = candidate as Framebuffer || this.fboB;
 			}
 
 			if ( 'isMaterial' in step ) {
-				readBuffers.forEach( ( buffer, i ) => {
-					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE0 + i );
+				readBuffers.forEach( ( buffer, j ) => {
+					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE0 + j );
 					this.renderer.gl.bindTexture( this.renderer.gl.TEXTURE_2D, buffer.texture );
-					step.updateUniform( `u_tDiffuse${i}`, ( v ) => { v[0] = i; });
+					// eslint-disable-next-line no-param-reassign
+					step.updateUniform( `u_tDiffuse${j}`, ( v ) => { v[0] = j; });
 				});
 
+				// eslint-disable-next-line no-param-reassign
 				step.updateUniform( 'u_fTime', ( v ) => { v[0] = performance.now(); });
 
 				this.renderer.renderDirect( this.tri, step, writeBuffer );
@@ -141,13 +150,13 @@ export default class PostFxPipeline {
 	}
 
 
-	public setSize( width: number, height: number ) {
+	public setSize( width: number, height: number ): void {
 		this.fboA.setSize( width, height );
 		this.fboB.setSize( width, height );
 	}
 
 
-	public delete() {
+	public delete(): void {
 		this.fboA.delete();
 		this.fboB.delete();
 	}

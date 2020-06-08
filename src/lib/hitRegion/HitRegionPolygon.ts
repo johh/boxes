@@ -2,7 +2,6 @@ import { vec4, vec2, mat4 } from 'gl-matrix';
 
 import { TraversableProps } from '../Traversable';
 import GenericHitRegion, { HitRegion } from './GenericHitRegion';
-import { Camera } from '../camera/GenericCamera';
 import BufferGeometry from '../BufferGeometry';
 import Renderable from '../Renderable';
 import Material from '../Material';
@@ -37,7 +36,7 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 	}
 
 
-	private resetVerts() {
+	private resetVerts(): void {
 		this.verts.forEach( ( vert, i ) => {
 			vec4.set( vert, this.initialVerts[i * 2], this.initialVerts[i * 2 + 1], 0, 1 );
 		});
@@ -56,8 +55,10 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 		this.verts.forEach( ( vert ) => {
 			vec4.transformMat4( vert, vert, this.matrix );
 
-			vert[0] = vert[0] / vert[3];
-			vert[1] = vert[1] / vert[3];
+			// eslint-disable-next-line no-param-reassign
+			vert[0] /= vert[3];
+			// eslint-disable-next-line no-param-reassign
+			vert[1] /= vert[3];
 		});
 
 		vec2.set( mouse, coords[0], coords[1]);
@@ -67,7 +68,7 @@ export default class HitRegionPolygon extends GenericHitRegion implements HitReg
 	}
 
 
-	public debug() {
+	public debug(): void {
 		const geometry = new BufferGeometry({
 			verts: this.initialVerts,
 			stride: 2,

@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import Renderer from '../Renderer';
 import { Texture } from '../texture/GenericTexture';
 
@@ -30,7 +31,7 @@ export default class Framebuffer implements Texture {
 			width = renderer.width,
 			height = renderer.height,
 			depth = false,
-			stencil= false,
+			stencil = false,
 		} = props;
 
 		this.gl = renderer.gl;
@@ -39,7 +40,7 @@ export default class Framebuffer implements Texture {
 
 		if ( depth && stencil ) {
 			this.depthStencilBuffer = this.gl.createRenderbuffer();
-		}else {
+		} else {
 			if ( depth ) this.depthBuffer = this.gl.createRenderbuffer();
 			if ( stencil ) this.stencilBuffer = this.gl.createRenderbuffer();
 		}
@@ -48,7 +49,7 @@ export default class Framebuffer implements Texture {
 	}
 
 
-	public setSize( width: number, height: number ) {
+	public setSize( width: number, height: number ): void {
 		this.width = width;
 		this.height = height;
 
@@ -130,29 +131,31 @@ export default class Framebuffer implements Texture {
 	}
 
 
-	public use() {
+	public use(): void {
 		this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, this.fbo );
 		this.gl.viewport( 0, 0, this.width, this.height );
 	}
 
 
-	public prepare() {
+	public prepare(): WebGLTexture {
 		return this.texture;
 	}
 
 
-	public clear() {
+	public clear(): void {
 		this.use();
 
 		let bitMask = this.gl.COLOR_BUFFER_BIT;
+		// eslint-disable-next-line no-bitwise
 		if ( this.depthBuffer || this.depthStencilBuffer ) bitMask |= this.gl.DEPTH_BUFFER_BIT;
+		// eslint-disable-next-line no-bitwise
 		if ( this.stencilBuffer || this.depthStencilBuffer ) bitMask |= this.gl.STENCIL_BUFFER_BIT;
 
 		this.gl.clear( bitMask );
 	}
 
 
-	public delete() {
+	public delete(): void {
 		this.gl.deleteFramebuffer( this.fbo );
 		this.gl.deleteTexture( this.texture );
 		if ( this.depthBuffer ) this.gl.deleteRenderbuffer( this.depthBuffer );

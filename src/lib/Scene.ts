@@ -4,7 +4,8 @@ import Traversable from './Traversable';
 import TransformNode from './TransformNode';
 import Renderable from './Renderable';
 import UniformProivder from './UniformProvider';
-import HitRegion from './hitRegion/GenericHitRegion';
+// eslint-disable-next-line import/no-cycle
+import GenericHitRegion from './hitRegion/GenericHitRegion';
 import { Camera } from './camera/GenericCamera';
 
 
@@ -19,9 +20,9 @@ type RenderTask = {
 export default class Scene extends Traversable {
 	private worldMatrix = mat4.create();
 	private renderQueue: RenderTask[] = [];
-	private shouldRebuildSceneGraph: boolean = true;
+	private shouldRebuildSceneGraph = true;
 	public activeCamera: Camera;
-	public activeLayer: number | undefined;
+	public activeLayer: number | undefined;
 	public readonly isScene = true;
 
 
@@ -30,15 +31,17 @@ export default class Scene extends Traversable {
 		node: Renderable | TransformNode | UniformProivder | Traversable,
 		renderQueue: RenderTask[],
 		uniformProviders: UniformProivder[],
-		queueMasks: boolean = false,
+		queueMasks = false,
 		parentLayer: number | undefined,
-	) {
+	): void {
 		const processChildren = (
 			_parentLayer = parentLayer,
 			_uniformProviders = uniformProviders,
-			) => {
+		): void => {
 			node.children.forEach( ( child ) => {
-				Scene.queueRenderables( gl, child, renderQueue, _uniformProviders, queueMasks, _parentLayer );
+				Scene.queueRenderables(
+					gl, child, renderQueue, _uniformProviders, queueMasks, _parentLayer,
+				);
 			});
 		};
 
@@ -51,7 +54,7 @@ export default class Scene extends Traversable {
 				const renderNode = (
 					view: mat4,
 					projection: mat4,
-				) => {
+				): void => {
 					uniformProviders.forEach( p => p.applyUniformsToNode( node ) );
 					if ( node.onBeforeRender ) node.onBeforeRender( node );
 					node.render( gl, view, projection );
@@ -63,33 +66,35 @@ export default class Scene extends Traversable {
 							{
 								layer,
 								order: -Infinity,
-								task: ( gl ) => {
-									gl.clear( gl.STENCIL_BUFFER_BIT );
-									gl.stencilOp( gl.KEEP, gl.KEEP, gl.REPLACE );
-									gl.stencilFunc( gl.ALWAYS, 1, 0xff );
-									gl.stencilMask( 0xff );
-									gl.colorMask( false, false, false, false );
-									gl.depthMask( false );
-									gl.enable( gl.STENCIL_TEST );
+								task: ( _gl ): void => {
+									_gl.clear( _gl.STENCIL_BUFFER_BIT );
+									_gl.stencilOp( _gl.KEEP, _gl.KEEP, _gl.REPLACE );
+									_gl.stencilFunc( _gl.ALWAYS, 1, 0xff );
+									_gl.stencilMask( 0xff );
+									_gl.colorMask( false, false, false, false );
+									_gl.depthMask( false );
+									_gl.enable( _gl.STENCIL_TEST );
 								},
 							},
 							{
 								layer,
 								order: Infinity,
-								task: ( gl, view, projection ) => {
-									gl.stencilFunc( gl.EQUAL, 1, 0xff );
-									gl.stencilMask( 0x00 );
-									gl.colorMask( true, true, true, true );
-									gl.depthMask( true );
+								task: ( _gl, view, projection ): void => {
+									_gl.stencilFunc( _gl.EQUAL, 1, 0xff );
+									_gl.stencilMask( 0x00 );
+									_gl.colorMask( true, true, true, true );
+									_gl.depthMask( true );
 
 									renderNode( view, projection );
 
-									gl.stencilMask( -1 );
-									gl.disable( gl.STENCIL_TEST );
+									_gl.stencilMask( -1 );
+									_gl.disable( _gl.STENCIL_TEST );
 								},
 							},
 						];
-						Scene.queueRenderables( gl, node.mask, subtasks, uniformProviders, true, layer );
+						Scene.queueRenderables(
+							gl, node.mask, subtasks, uniformProviders, true, layer,
+						);
 						subtasks.sort( ( a, b ) => a.order - b.order );
 
 						renderQueue.push({
@@ -101,7 +106,7 @@ export default class Scene extends Traversable {
 						renderQueue.push({
 							layer,
 							order: node.renderOrder,
-							task: ( gl, view, projection ) => {
+							task: ( _, view, projection ) => {
 								renderNode( view, projection );
 							},
 						});
@@ -137,7 +142,8 @@ export default class Scene extends Traversable {
 		view: mat4,
 		projection: mat4,
 		layer: number | undefined,
-	) {
+	): void {
+		// eslint-disable-next-line id-blacklist
 		if ( layer === undefined || task.layer === layer ) {
 			if ( task.task ) task.task( gl, view, projection );
 			if ( task.subtasks ) {
@@ -148,9 +154,9 @@ export default class Scene extends Traversable {
 
 
 	public calculateTransforms(
-			node: Renderable | TransformNode | HitRegion | Traversable,
-			parentWorldMatrix: mat4,
-		) {
+		node: Renderable | TransformNode | GenericHitRegion| Traversable,
+		parentWorldMatrix: mat4,
+	): void {
 		if ( node.visible ) {
 			let worldMatrix: mat4;
 
@@ -165,6 +171,7 @@ export default class Scene extends Traversable {
 
 			if ( 'isHitRegion' in node ) {
 				node.setWorldMatrix( worldMatrix );
+				// eslint-disable-next-line no-param-reassign
 				node.scene = this;
 			}
 
@@ -172,21 +179,21 @@ export default class Scene extends Traversable {
 				this.calculateTransforms( child, worldMatrix );
 			});
 		}
-
 	}
 
 
-	public invalidateSceneGraph() {
+	public invalidateSceneGraph(): void {
 		this.shouldRebuildSceneGraph = true;
 	}
 
 
 	public render(
 		gl: WebGLRenderingContext,
-	) {
+	): void {
 		this.calculateTransforms( this, this.worldMatrix );
 
 		if ( !this.activeCamera ) {
+			// eslint-disable-next-line no-console
 			console.warn( 'Scene: No active camera provided.' );
 
 			return;
@@ -208,6 +215,8 @@ export default class Scene extends Traversable {
 		}
 
 		this.renderQueue.sort( ( a, b ) => a.order - b.order );
-		this.renderQueue.forEach( t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix, layer ) );
+		this.renderQueue.forEach(
+			t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix, layer ),
+		);
 	}
 }

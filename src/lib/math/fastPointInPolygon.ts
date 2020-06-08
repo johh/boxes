@@ -11,18 +11,17 @@ export default function fastPointInPolygon( point: vec2, polygon: vec2[] | vec4[
 	const x = point[0];
 	const y = point[1];
 
-	let isInside: boolean = false;
+	let isInside = false;
 
 	let p1 = polygon.length - 1;
 	for ( let p0 = 0; p0 < polygon.length; p0 += 1 ) {
-
 		const p0x = polygon[p0][0];
 		const p0y = polygon[p0][1];
 		const p1x = polygon[p1][0];
 		const p1y = polygon[p1][1];
 
 		const intersect = ( ( p0y > y ) !== ( p1y > y ) )
-			&& ( x < ( p1x - p0x ) * ( y - p0y ) / ( p1y - p0y ) + p0x );
+			&& ( x < ( ( p1x - p0x ) * ( y - p0y ) ) / ( p1y - p0y ) + p0x );
 
 		if ( intersect ) isInside = !isInside;
 

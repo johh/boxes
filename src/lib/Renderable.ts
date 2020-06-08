@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { mat4 } from 'gl-matrix';
 
 import BufferGeometry from './BufferGeometry';
@@ -66,10 +67,17 @@ export default class Renderable extends TransformNode {
 	}
 
 
-	public render( gl: WebGLRenderingContext, viewMatrix: mat4, projectionMatrix: mat4 ) {
+	public render(
+		gl: WebGLRenderingContext,
+		viewMatrix: mat4,
+		projectionMatrix: mat4,
+	): void {
 		this.material.updateUniform( 'u_mModel', ( m: mat4 ) => mat4.copy( m, this.worldMatrix ) );
 		this.material.updateUniform( 'u_mView', ( m: mat4 ) => mat4.copy( m, viewMatrix ) );
-		this.material.updateUniform( 'u_mProjection', ( m: mat4 ) => mat4.copy( m, projectionMatrix ) );
+		this.material.updateUniform(
+			'u_mProjection',
+			( m: mat4 ) => mat4.copy( m, projectionMatrix ),
+		);
 
 
 		if ( !this.depthTest ) gl.disable( gl.DEPTH_TEST );
@@ -95,7 +103,7 @@ export default class Renderable extends TransformNode {
 	}
 
 
-	public delete() {
+	public delete(): void {
 		this.geometry.delete();
 		this.material.delete();
 	}

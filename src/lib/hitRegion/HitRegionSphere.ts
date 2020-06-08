@@ -2,7 +2,6 @@ import { vec4, vec2 } from 'gl-matrix';
 
 import GenericHitRegion, { HitRegion } from './GenericHitRegion';
 import { TraversableProps } from '../Traversable';
-import { Camera } from '../camera/GenericCamera';
 
 
 const vert = vec4.create();
@@ -15,7 +14,7 @@ interface HitRegionSphereProps extends TraversableProps {
 }
 
 
-export default class HitRegionSphere extends GenericHitRegion implements HitRegion{
+export default class HitRegionSphere extends GenericHitRegion implements HitRegion {
 	public radius: number;
 
 
@@ -40,11 +39,11 @@ export default class HitRegionSphere extends GenericHitRegion implements HitRegi
 		vec4.transformMat4( vert, vert, viewMatrix );
 		vec4.transformMat4( vert, vert, projectionMatrix );
 
-		vec2.set( projected, vert[0] / vert[3] * aspect, vert[1] / vert[3]);
+		vec2.set( projected, vert[0] / ( vert[3] * aspect ), vert[1] / vert[3]);
 
 		vec2.set( mouse, coords[0] * aspect, coords[1]);
 
-		const maxDistance = this.radius / vert[3] * projectionMatrix[5];
+		const maxDistance = this.radius / ( vert[3] * projectionMatrix[5]);
 		const distance = vec2.distance( mouse, projected );
 
 		if ( distance < maxDistance ) {

@@ -13,14 +13,14 @@ interface BufferGeometryProps {
 
 
 type BufferAttributeList = {
-	[name: string]: number[],
+	[name: string]: number[];
 };
 
 
 type BufferAttributeReference = {
-	name: string,
-	size: number,
-	offset: number,
+	name: string;
+	size: number;
+	offset: number;
 };
 
 
@@ -57,10 +57,10 @@ export default class BufferGeometry {
 	}
 
 
-	private upload() {
+	private upload(): WebGLBuffer {
 		if ( this.buffer ) return this.buffer;
 
-		const gl = this.gl;
+		const { gl } = this;
 
 		let data = [].concat( this.verts );
 		let offset = this.verts.length * 4;
@@ -75,11 +75,14 @@ export default class BufferGeometry {
 
 		Object.keys( this.inputAttributes ).forEach( ( name ) => {
 			const attribute = this.inputAttributes[name];
-			const _offset = offset;
+			const currentOffset = offset;
 			let size = attribute.length / ( this.verts.length / this.stride );
 
 			if ( size % 1 !== 0 ) {
-				console.warn( `[WEBGL] Unsupported attribute size for "${name}", filling with zeroes` );
+				// eslint-disable-next-line no-console
+				console.warn(
+					`[WEBGL] Unsupported attribute size for "${name}", filling with zeroes`,
+				);
 				size = 1;
 				data = data.concat( Array( this.verts.length / this.stride ).fill( 0 ) );
 			} else {
@@ -89,7 +92,7 @@ export default class BufferGeometry {
 			this.attributes.push({
 				name,
 				size,
-				offset: _offset,
+				offset: currentOffset,
 			});
 
 			offset += ( this.verts.length / this.stride ) * size * 4;
@@ -111,11 +114,13 @@ export default class BufferGeometry {
 				gl.STATIC_DRAW,
 			);
 		}
+
+		return this.buffer;
 	}
 
 
-	private prepare( material: Material ) {
-		const gl = this.gl;
+	private prepare( material: Material ): void {
+		const { gl } = this;
 
 		this.attributes.forEach( ( attribute ) => {
 			const index = material.getAttributeLocation( attribute.name );
@@ -127,7 +132,7 @@ export default class BufferGeometry {
 	}
 
 
-	public draw( gl: WebGLRenderingContext, material: Material ) {
+	public draw( gl: WebGLRenderingContext, material: Material ): void {
 		this.gl = gl;
 
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload() );
@@ -142,11 +147,11 @@ export default class BufferGeometry {
 	}
 
 
-	public delete() {
+	public delete(): void {
 		if ( this.buffer ) this.gl.deleteBuffer( this.buffer );
 		if ( this.indexBuffer ) this.gl.deleteBuffer( this.indexBuffer );
 
-		this.buffer = undefined;
-		this.indexBuffer = undefined;
+		this.buffer = null;
+		this.indexBuffer = null;
 	}
 }

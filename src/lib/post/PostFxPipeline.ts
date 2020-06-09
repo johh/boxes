@@ -130,10 +130,7 @@ export default class PostFxPipeline {
 
 			if ( 'isMaterial' in step ) {
 				readBuffers.forEach( ( buffer, j ) => {
-					this.renderer.gl.activeTexture( this.renderer.gl.TEXTURE0 + j );
-					this.renderer.gl.bindTexture( this.renderer.gl.TEXTURE_2D, buffer.texture );
-					// eslint-disable-next-line no-param-reassign
-					step.updateUniform( `u_tDiffuse${j}`, ( v ) => { v[0] = j; });
+					step.setUniform( `u_tDiffuse${j}`, buffer );
 				});
 
 				// eslint-disable-next-line no-param-reassign

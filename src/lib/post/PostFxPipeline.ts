@@ -14,12 +14,17 @@ interface PostFxPipelineProps {
 	skipFboGeneration?: boolean;
 }
 
+type StepFunction = (
+	src: Framebuffer,
+	dest: Framebuffer,
+) => void;
 
 type PostFxPipelineStep =
 	Material |
 	Framebuffer |
 	Framebuffer[] |
-	Scene;
+	Scene |
+	StepFunction;
 
 
 const getFramebufferFromPipelineStep = (
@@ -95,7 +100,7 @@ export default class PostFxPipeline {
 	}
 
 
-	private swapBuffers(): void {
+	public swapBuffers(): void {
 		this.fboA.clear();
 
 		const temp = this.fboA;
@@ -142,6 +147,8 @@ export default class PostFxPipeline {
 			} else if ( 'isScene' in step ) {
 				this.renderer.render( step, writeBuffer );
 				this.swapBuffers();
+			} else if ( typeof step === 'function' ) {
+				step( readBuffers[0], writeBuffer );
 			}
 		});
 	}

@@ -1,7 +1,7 @@
 import GenericTexture, { GenericTextureProps } from './GenericTexture';
 
 
-interface ImageTextureProps extends GenericTextureProps {
+export interface ImageTextureProps extends GenericTextureProps {
 	src: string;
 }
 

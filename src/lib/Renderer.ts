@@ -8,7 +8,7 @@ import Framebuffer from './post/Framebuffer';
 type Color = [number, number, number, number];
 
 
-interface RendererPops {
+export interface RendererPops {
 	canvas: HTMLCanvasElement;
 	width?: number;
 	height?: number;

@@ -5,7 +5,7 @@ import Material from '../Material';
 import Scene from '../Scene';
 
 
-interface PostFxPipelineProps {
+export interface PostFxPipelineProps {
 	renderer: Renderer;
 	width?: number;
 	height?: number;

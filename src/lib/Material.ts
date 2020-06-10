@@ -11,7 +11,7 @@ import {
 import { Texture } from './texture/GenericTexture';
 
 
-interface MaterialProps {
+export interface MaterialProps {
 	vertexShader?: string;
 	fragmentShader?: string;
 	uniforms?: UniformList;

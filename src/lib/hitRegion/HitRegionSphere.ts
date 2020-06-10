@@ -9,7 +9,7 @@ const projected = vec2.create();
 const mouse = vec2.create();
 
 
-interface HitRegionSphereProps extends TraversableProps {
+export interface HitRegionSphereProps extends TraversableProps {
 	radius?: number;
 }
 

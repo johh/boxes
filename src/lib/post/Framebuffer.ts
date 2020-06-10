@@ -3,7 +3,7 @@ import Renderer from '../Renderer';
 import { Texture } from '../texture/GenericTexture';
 
 
-interface FramebufferProps {
+export interface FramebufferProps {
 	renderer: Renderer;
 	width?: number;
 	height?: number;

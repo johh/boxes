@@ -3,7 +3,7 @@ import { mat4 } from 'gl-matrix';
 import GenericCamera, { Camera } from './GenericCamera';
 
 
-interface PerspectiveCameraProps {
+export interface PerspectiveCameraProps {
 	fov?: number;
 	aspect?: number;
 	near?: number;

@@ -10,7 +10,7 @@ import Traversable from './Traversable';
 type BlendType = 'normal' | 'additive';
 
 
-interface RenderableProps extends TransformNodeProps {
+export interface RenderableProps extends TransformNodeProps {
 	geometry: BufferGeometry;
 	material: Material;
 	depthTest?: boolean;

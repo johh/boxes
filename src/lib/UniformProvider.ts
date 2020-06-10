@@ -12,7 +12,7 @@ interface UniformProviderUpdateList {
 }
 
 
-interface UniformProviderProps extends TraversableProps {
+export interface UniformProviderProps extends TraversableProps {
 	uniforms: UniformList;
 }
 

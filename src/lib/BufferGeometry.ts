@@ -2,7 +2,7 @@ import { TriangleDrawMode } from './Enums';
 import Material from './Material';
 
 
-interface BufferGeometryProps {
+export interface BufferGeometryProps {
 	verts: number[];
 	mode?: TriangleDrawMode;
 	attributes?: BufferAttributeList;

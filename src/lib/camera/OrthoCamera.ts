@@ -3,7 +3,7 @@ import { mat4 } from 'gl-matrix';
 import GenericCamera, { Camera } from './GenericCamera';
 
 
-interface OrthoCameraProps {
+export interface OrthoCameraProps {
 	top?: number;
 	left?: number;
 	right?: number;

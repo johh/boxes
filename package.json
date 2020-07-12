@@ -1,6 +1,6 @@
 {
 	"name": "@downpourdigital/boxes",
-	"version": "0.3.10",
+	"version": "0.3.11",
 	"description": "Babbies first WebGL library",
 	"main": "dist/boxes.js",
 	"repository": "https://github.com/johh/boxes.git",

@@ -34,6 +34,7 @@ export default class Renderable extends TransformNode {
 	public layer: number | undefined;
 	public blending: BlendType;
 	public renderOrder: number;
+	private skipFrame = true;
 
 
 	constructor( props: RenderableProps ) {
@@ -95,7 +96,15 @@ export default class Renderable extends TransformNode {
 		}
 
 		this.material.use( gl );
-		this.geometry.draw( gl, this.material );
+
+		// skip drawing on first frame of visibility.
+		// this is a workaround to avoid a "FOUC" where uniforms aren't committed yet.
+
+		if ( !this.skipFrame ) {
+			this.geometry.draw( gl, this.material );
+		} else {
+			this.skipFrame = false;
+		}
 
 		if ( !this.depthTest ) gl.enable( gl.DEPTH_TEST );
 		if ( !this.depthWrite ) gl.depthMask( true );

@@ -5,6 +5,7 @@ import BufferGeometry from './BufferGeometry';
 import Material from './Material';
 import TransformNode, { TransformNodeProps } from './TransformNode';
 import Traversable from './Traversable';
+import { Renderer } from '../boxes';
 
 
 type BlendType = 'normal' | 'additive';
@@ -69,10 +70,12 @@ export default class Renderable extends TransformNode {
 
 
 	public render(
-		gl: WebGLRenderingContext,
+		renderer: Renderer,
 		viewMatrix: mat4,
 		projectionMatrix: mat4,
 	): void {
+		const { gl } = renderer;
+
 		this.material.updateUniform( 'u_mModel', ( m: mat4 ) => mat4.copy( m, this.worldMatrix ) );
 		this.material.updateUniform( 'u_mView', ( m: mat4 ) => mat4.copy( m, viewMatrix ) );
 		this.material.updateUniform(
@@ -101,7 +104,7 @@ export default class Renderable extends TransformNode {
 		// this is a workaround to avoid a "FOUC" where uniforms aren't committed yet.
 
 		if ( !this.skipFrame ) {
-			this.geometry.draw( gl, this.material );
+			this.geometry.draw( renderer, this.material );
 		} else {
 			this.skipFrame = false;
 		}

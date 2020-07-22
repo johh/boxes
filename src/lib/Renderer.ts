@@ -1,3 +1,6 @@
+/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/camelcase */
+
 import Scene from './Scene';
 import BufferGeometry from './BufferGeometry';
 import Material from './Material';
@@ -21,6 +24,11 @@ export interface RendererPops {
 
 export default class Renderer {
 	public gl: WebGLRenderingContext;
+	public ext: {
+		vao: OES_vertex_array_object;
+		standardDerivatives: OES_standard_derivatives;
+	};
+
 	public canvas: HTMLCanvasElement;
 	public width: number;
 	public height: number;
@@ -41,6 +49,11 @@ export default class Renderer {
 		} = props;
 
 		this.gl = canvas.getContext( 'webgl', { alpha: transparency, stencil: true });
+		this.ext = {
+			vao: this.gl.getExtension( 'OES_vertex_array_object' ),
+			standardDerivatives: this.gl.getExtension( 'OES_standard_derivatives' ),
+		};
+
 		this.clearColor = clearColor;
 		this.autoClear = autoClear;
 		this.cullFaces = cullFaces;
@@ -76,7 +89,7 @@ export default class Renderer {
 			this.gl.cullFace( this.gl.BACK );
 		}
 
-		scene.render( this.gl );
+		scene.render( this );
 	}
 
 
@@ -92,7 +105,7 @@ export default class Renderer {
 		}
 
 		material.use( this.gl );
-		geometry.draw( this.gl, material );
+		geometry.draw( this, material );
 	}
 
 

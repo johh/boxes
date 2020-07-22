@@ -1,5 +1,6 @@
 import { TriangleDrawMode } from './Enums';
 import Material from './Material';
+import { Renderer } from '../boxes'; // avoid dependency cycle
 
 
 export interface BufferGeometryProps {
@@ -35,7 +36,8 @@ export default class BufferGeometry {
 	protected mode: TriangleDrawMode;
 	protected stride: number;
 	protected vertexName: string;
-	private gl: WebGLRenderingContext;
+	protected vaos = new Map<Material, WebGLVertexArrayObjectOES>();
+	private renderer: Renderer;
 
 	constructor( props: BufferGeometryProps ) {
 		const {
@@ -57,10 +59,10 @@ export default class BufferGeometry {
 	}
 
 
-	private upload(): WebGLBuffer {
+	private getBuffer(): WebGLBuffer {
 		if ( this.buffer ) return this.buffer;
 
-		const { gl } = this;
+		const { gl } = this.renderer;
 
 		let data = [].concat( this.verts );
 		let offset = this.verts.length * 4;
@@ -119,8 +121,23 @@ export default class BufferGeometry {
 	}
 
 
-	private prepare( material: Material ): void {
-		const { gl } = this;
+	private getVao( material: Material ): WebGLVertexArrayObjectOES {
+		const currentVao = this.vaos.get( material );
+
+		if ( currentVao ) {
+			return currentVao;
+		}
+
+		const { gl, ext: { vao } } = this.renderer;
+
+		const newVao = vao.createVertexArrayOES();
+		vao.bindVertexArrayOES( newVao );
+
+		if ( this.indices ) {
+			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );
+		}
+
+		gl.bindBuffer( gl.ARRAY_BUFFER, this.getBuffer() );
 
 		this.attributes.forEach( ( attribute ) => {
 			const index = material.getAttributeLocation( attribute.name );
@@ -129,17 +146,21 @@ export default class BufferGeometry {
 			gl.enableVertexAttribArray( index );
 			gl.vertexAttribPointer( index, attribute.size, gl.FLOAT, false, 0, attribute.offset );
 		});
+
+		vao.bindVertexArrayOES( null );
+
+		this.vaos.set( material, newVao );
+		return newVao;
 	}
 
 
-	public draw( gl: WebGLRenderingContext, material: Material ): void {
-		this.gl = gl;
+	public draw( renderer: Renderer, material: Material ): void {
+		const { gl, ext: { vao } } = renderer;
+		this.renderer = renderer;
 
-		gl.bindBuffer( gl.ARRAY_BUFFER, this.upload() );
-		this.prepare( material );
+		vao.bindVertexArrayOES( this.getVao( material ) );
 
 		if ( this.indices ) {
-			gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer );
 			gl.drawElements( this.mode, this.indices.length, gl.UNSIGNED_SHORT, 0 );
 		} else {
 			gl.drawArrays( this.mode, 0, this.verts.length / this.stride );
@@ -148,8 +169,13 @@ export default class BufferGeometry {
 
 
 	public delete(): void {
-		if ( this.buffer ) this.gl.deleteBuffer( this.buffer );
-		if ( this.indexBuffer ) this.gl.deleteBuffer( this.indexBuffer );
+		const { gl, ext: { vao } } = this.renderer;
+
+		if ( this.buffer ) gl.deleteBuffer( this.buffer );
+		if ( this.indexBuffer ) gl.deleteBuffer( this.indexBuffer );
+
+		this.vaos.forEach( v => vao.deleteVertexArrayOES( v ) );
+		this.vaos.clear();
 
 		this.buffer = null;
 		this.indexBuffer = null;

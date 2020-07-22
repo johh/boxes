@@ -7,6 +7,7 @@ import UniformProivder from './UniformProvider';
 // eslint-disable-next-line import/no-cycle
 import GenericHitRegion from './hitRegion/GenericHitRegion';
 import { Camera } from './camera/GenericCamera';
+import { Renderer } from '../boxes';
 
 
 type RenderTask = {
@@ -27,7 +28,7 @@ export default class Scene extends Traversable {
 
 
 	static queueRenderables(
-		gl: WebGLRenderingContext,
+		renderer: Renderer,
 		node: Renderable | TransformNode | UniformProivder | Traversable,
 		renderQueue: RenderTask[],
 		uniformProviders: UniformProivder[],
@@ -40,7 +41,7 @@ export default class Scene extends Traversable {
 		): void => {
 			node.children.forEach( ( child ) => {
 				Scene.queueRenderables(
-					gl, child, renderQueue, _uniformProviders, queueMasks, _parentLayer,
+					renderer, child, renderQueue, _uniformProviders, queueMasks, _parentLayer,
 				);
 			});
 		};
@@ -57,7 +58,7 @@ export default class Scene extends Traversable {
 				): void => {
 					uniformProviders.forEach( p => p.applyUniformsToNode( node ) );
 					if ( node.onBeforeRender ) node.onBeforeRender( node );
-					node.render( gl, view, projection );
+					node.render( renderer, view, projection );
 				};
 
 				if ( !node.maskOnly || queueMasks ) {
@@ -93,7 +94,7 @@ export default class Scene extends Traversable {
 							},
 						];
 						Scene.queueRenderables(
-							gl, node.mask, subtasks, uniformProviders, true, layer,
+							renderer, node.mask, subtasks, uniformProviders, true, layer,
 						);
 						subtasks.sort( ( a, b ) => a.order - b.order );
 
@@ -138,16 +139,18 @@ export default class Scene extends Traversable {
 
 	static runRecursive(
 		task: RenderTask,
-		gl: WebGLRenderingContext,
+		renderer: Renderer,
 		view: mat4,
 		projection: mat4,
 		layer: number | undefined,
 	): void {
 		// eslint-disable-next-line id-blacklist
 		if ( layer === undefined || task.layer === layer ) {
-			if ( task.task ) task.task( gl, view, projection );
+			if ( task.task ) task.task( renderer.gl, view, projection );
 			if ( task.subtasks ) {
-				task.subtasks.forEach( t => Scene.runRecursive( t, gl, view, projection, layer ) );
+				task.subtasks.forEach(
+					t => Scene.runRecursive( t, renderer, view, projection, layer ),
+				);
 			}
 		}
 	}
@@ -188,7 +191,7 @@ export default class Scene extends Traversable {
 
 
 	public render(
-		gl: WebGLRenderingContext,
+		renderer: Renderer,
 	): void {
 		this.calculateTransforms( this, this.worldMatrix );
 
@@ -209,14 +212,14 @@ export default class Scene extends Traversable {
 
 		if ( this.shouldRebuildSceneGraph ) {
 			this.renderQueue = [];
-			Scene.queueRenderables( gl, this, this.renderQueue, [], false, 0 );
+			Scene.queueRenderables( renderer, this, this.renderQueue, [], false, 0 );
 
 			this.shouldRebuildSceneGraph = false;
 		}
 
 		this.renderQueue.sort( ( a, b ) => a.order - b.order );
 		this.renderQueue.forEach(
-			t => Scene.runRecursive( t, gl, viewMatrix, projectionMatrix, layer ),
+			t => Scene.runRecursive( t, renderer, viewMatrix, projectionMatrix, layer ),
 		);
 	}
 }

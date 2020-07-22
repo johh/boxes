@@ -15,12 +15,12 @@
 		"lint": "eslint --ext .ts,.tsx,.js src/"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.5.0",
-		"@babel/core": "^7.5.4",
-		"@babel/plugin-proposal-class-properties": "^7.5.0",
-		"@babel/plugin-proposal-object-rest-spread": "^7.5.4",
-		"@babel/preset-env": "^7.5.4",
-		"@babel/preset-typescript": "^7.3.3",
+		"@babel/cli": "^7.10.5",
+		"@babel/core": "^7.10.5",
+		"@babel/plugin-proposal-class-properties": "^7.10.4",
+		"@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+		"@babel/preset-env": "^7.10.4",
+		"@babel/preset-typescript": "^7.10.4",
 		"@types/gl-matrix": "^2.4.5",
 		"@typescript-eslint/eslint-plugin": "^2",
 		"@typescript-eslint/parser": "^2",
@@ -32,11 +32,11 @@
 		"eslint-plugin-react": "^7.20.0",
 		"eslint-plugin-react-hooks": "^2.5.0",
 		"husky": "^4.2.5",
-		"lint-staged": "^10.2.9",
-		"rollup": "^2.8.0",
-		"rollup-plugin-typescript2": "^0.27.0",
-		"tslib": "^1.10.0",
-		"typescript": "^3.5.3"
+		"lint-staged": "^10.2.11",
+		"rollup": "^2.22.2",
+		"rollup-plugin-typescript2": "^0.27.1",
+		"tslib": "^2.0.0",
+		"typescript": "^3.9.7"
 	},
 	"dependencies": {
 		"gl-matrix": "^3.1.0"

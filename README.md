@@ -17,6 +17,7 @@ import {
 	Renderer,
 	Material,
 	BufferGeometry,
+	InstancedAttribute,
 	Renderable,
 	ImageTexture,
 	Scene,
@@ -120,6 +121,37 @@ const geometry = new BufferGeometry({
 	stride: 3, // number of components in each vertex
 });
 
+```
+
+`BufferGeometry` also supports instanced rendering:
+
+```typescript
+import { BufferGeometry, InstancedAttribute, vec2 } from '@downpourdigital/boxes';
+
+const vec2Attr = new InstancedAttribute({
+	length: 2, // number of floats per instance
+	dynamic: true, // whether values will be updated
+});
+
+const mat4Attr = new InstancedAttribute({
+	length: 16,
+	dynamic: true,
+});
+
+const geometry = new BufferGeometry({
+	verts: [...],
+	instances: 10,
+	instancedAttributes: {
+		a_vTest: vec2Attr,
+		a_mTest: mat4Attr,
+	},
+});
+
+// interacting with instances:
+const i = 4;
+
+vec2.set( vec2Attr.views[i], 1, 1 );
+vec2Attr.update();
 ```
 
 

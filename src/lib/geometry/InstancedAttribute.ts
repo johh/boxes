@@ -37,6 +37,7 @@ export default class InstancedAttribute {
 
 	public update(): void {
 		if ( !this.dynamic && !this.needsUpdate ) {
+			// eslint-disable-next-line no-console
 			console.warn( '[WebGL]: You shouldn\'t update attributes not marked as dynamic.' );
 		}
 

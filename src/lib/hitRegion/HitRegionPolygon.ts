@@ -2,7 +2,7 @@ import { vec4, vec2, mat4 } from 'gl-matrix';
 
 import { TraversableProps } from '../Traversable';
 import GenericHitRegion, { HitRegion } from './GenericHitRegion';
-import BufferGeometry from '../BufferGeometry';
+import BufferGeometry from '../geometry/BufferGeometry';
 import Renderable from '../Renderable';
 import Material from '../Material';
 import fastPointInPolygon from '../math/fastPointInPolygon';

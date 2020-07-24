@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 
 import * as float from './lib/math/float';
 import * as int from './lib/math/int';
@@ -10,7 +11,8 @@ export const enums = typeof WebGLRenderingContext !== 'undefined'
 export { default as Renderer } from './lib/Renderer';
 export { default as Material } from './lib/Material';
 export { default as UniformProvider } from './lib/UniformProvider';
-export { default as BufferGeometry } from './lib/BufferGeometry';
+export { default as BufferGeometry } from './lib/geometry/BufferGeometry';
+export { default as InstancedAttribute } from './lib/geometry/InstancedAttribute';
 export { default as Renderable } from './lib/Renderable';
 export { default as Scene } from './lib/Scene';
 export { default as TransformNode } from './lib/TransformNode';

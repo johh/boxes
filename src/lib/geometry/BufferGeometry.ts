@@ -1,6 +1,7 @@
-import { TriangleDrawMode } from './Enums';
-import Material from './Material';
-import { Renderer } from '../boxes'; // avoid dependency cycle
+import { TriangleDrawMode } from '../Enums';
+import Material from '../Material';
+import { Renderer } from '../../boxes'; // avoid dependency cycle
+import InstancedAttribute from './InstancedAttribute';
 
 
 export interface BufferGeometryProps {
@@ -10,6 +11,10 @@ export interface BufferGeometryProps {
 	indices?: number[];
 	stride?: number;
 	vertexName?: string;
+	instances?: number;
+	instancedAttributes?: {
+		[name: string]: InstancedAttribute;
+	};
 }
 
 
@@ -25,6 +30,12 @@ type BufferAttributeReference = {
 };
 
 
+type InstancedAttributeReference = {
+	instancedAttribute: InstancedAttribute;
+	buffer: WebGLBuffer;
+};
+
+
 export default class BufferGeometry {
 	protected verts: number[];
 	protected inputAttributes: BufferAttributeList;
@@ -37,6 +48,8 @@ export default class BufferGeometry {
 	protected stride: number;
 	protected vertexName: string;
 	protected vaos = new Map<Material, WebGLVertexArrayObjectOES>();
+	protected instancedAttributes: Map<string, InstancedAttributeReference>;
+	protected instances: number;
 	private renderer: Renderer;
 
 	constructor( props: BufferGeometryProps ) {
@@ -47,6 +60,8 @@ export default class BufferGeometry {
 			indices,
 			stride = 3,
 			vertexName = 'a_vPosition',
+			instances = 0,
+			instancedAttributes,
 		} = props;
 
 		this.verts = verts;
@@ -54,8 +69,19 @@ export default class BufferGeometry {
 		this.stride = stride;
 		this.inputAttributes = attributes;
 		this.vertexName = vertexName;
+		this.instances = instances;
 
 		if ( indices ) this.indices = new Uint16Array( indices );
+		if ( instances > 0 && instancedAttributes ) {
+			this.instancedAttributes = new Map();
+			Object.entries( instancedAttributes ).forEach( ([key, attr]) => {
+				attr.init( instances );
+				this.instancedAttributes.set( key, {
+					instancedAttribute: attr,
+					buffer: null,
+				});
+			});
+		}
 	}
 
 
@@ -117,6 +143,25 @@ export default class BufferGeometry {
 			);
 		}
 
+		if ( this.instancedAttributes ) {
+			this.instancedAttributes.forEach( ( ref, key ) => {
+				const buffer = gl.createBuffer();
+				gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
+				gl.bufferData(
+					gl.ARRAY_BUFFER,
+					ref.instancedAttribute.data,
+					ref.instancedAttribute.dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW,
+				);
+
+				ref.instancedAttribute.setUpdated();
+
+				this.instancedAttributes.set(
+					key,
+					Object.assign( ref, { buffer }),
+				);
+			});
+		}
+
 		return this.buffer;
 	}
 
@@ -128,7 +173,12 @@ export default class BufferGeometry {
 			return currentVao;
 		}
 
-		const { gl, ext: { vao } } = this.renderer;
+		const {
+			gl, ext: {
+				vao,
+				instancedArrays,
+			},
+		} = this.renderer;
 
 		const newVao = vao.createVertexArrayOES();
 		vao.bindVertexArrayOES( newVao );
@@ -147,6 +197,32 @@ export default class BufferGeometry {
 			gl.vertexAttribPointer( index, attribute.size, gl.FLOAT, false, 0, attribute.offset );
 		});
 
+		if ( this.instancedAttributes ) {
+			this.instancedAttributes.forEach( ( ref, name ) => {
+				const index = material.getAttributeLocation( name );
+				gl.bindBuffer( gl.ARRAY_BUFFER, ref.buffer );
+
+				const bytesPerInstance = ref.instancedAttribute.length * 4;
+				const slots = ref.instancedAttribute.length / 4;
+
+				for ( let i = 0; i < slots; i += 1 ) {
+					const location = index + i;
+					const offset = i * 16; // 16 bytes per slot
+
+					gl.enableVertexAttribArray( location );
+					gl.vertexAttribPointer(
+						location,
+						Math.min( 4, ref.instancedAttribute.length ),
+						gl.FLOAT,
+						false,
+						bytesPerInstance,
+						offset,
+					);
+					instancedArrays.vertexAttribDivisorANGLE( location, 1 );
+				}
+			});
+		}
+
 		vao.bindVertexArrayOES( null );
 
 		this.vaos.set( material, newVao );
@@ -155,12 +231,29 @@ export default class BufferGeometry {
 
 
 	public draw( renderer: Renderer, material: Material ): void {
-		const { gl, ext: { vao } } = renderer;
+		const { gl, ext: { vao, instancedArrays } } = renderer;
 		this.renderer = renderer;
 
 		vao.bindVertexArrayOES( this.getVao( material ) );
 
-		if ( this.indices ) {
+		if ( this.instancedAttributes ) {
+			this.instancedAttributes.forEach( ref => {
+				if ( ref.instancedAttribute.needsUpdate ) {
+					gl.bindBuffer( gl.ARRAY_BUFFER, ref.buffer );
+					gl.bufferSubData( gl.ARRAY_BUFFER, 0, ref.instancedAttribute.data );
+				}
+			});
+
+			if ( this.indices ) {
+				instancedArrays.drawElementsInstancedANGLE(
+					this.mode, this.indices.length, gl.UNSIGNED_SHORT, 0, this.instances,
+				);
+			} else {
+				instancedArrays.drawArraysInstancedANGLE(
+					this.mode, 0, this.verts.length / this.stride, this.instances,
+				);
+			}
+		} else if ( this.indices ) {
 			gl.drawElements( this.mode, this.indices.length, gl.UNSIGNED_SHORT, 0 );
 		} else {
 			gl.drawArrays( this.mode, 0, this.verts.length / this.stride );

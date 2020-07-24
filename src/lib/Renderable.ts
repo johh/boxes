@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { mat4 } from 'gl-matrix';
 
-import BufferGeometry from './BufferGeometry';
+import BufferGeometry from './geometry/BufferGeometry';
 import Material from './Material';
 import TransformNode, { TransformNodeProps } from './TransformNode';
 import Traversable from './Traversable';

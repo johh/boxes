@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import Scene from './Scene';
-import BufferGeometry from './BufferGeometry';
+import BufferGeometry from './geometry/BufferGeometry';
 import Material from './Material';
 // eslint-disable-next-line import/no-cycle
 import Framebuffer from './post/Framebuffer';
@@ -27,6 +27,7 @@ export default class Renderer {
 	public ext: {
 		vao: OES_vertex_array_object;
 		standardDerivatives: OES_standard_derivatives;
+		instancedArrays: ANGLE_instanced_arrays;
 	};
 
 	public canvas: HTMLCanvasElement;
@@ -52,6 +53,7 @@ export default class Renderer {
 		this.ext = {
 			vao: this.gl.getExtension( 'OES_vertex_array_object' ),
 			standardDerivatives: this.gl.getExtension( 'OES_standard_derivatives' ),
+			instancedArrays: this.gl.getExtension( 'ANGLE_instanced_arrays' ),
 		};
 
 		this.clearColor = clearColor;

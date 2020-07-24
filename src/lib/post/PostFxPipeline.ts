@@ -1,4 +1,4 @@
-import BufferGeometry from '../BufferGeometry';
+import BufferGeometry from '../geometry/BufferGeometry';
 import Renderer from '../Renderer';
 import Framebuffer from './Framebuffer';
 import Material from '../Material';

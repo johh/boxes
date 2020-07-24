@@ -262,6 +262,8 @@ export default class BufferGeometry {
 
 
 	public delete(): void {
+		if ( !this.renderer ) return;
+
 		const { gl, ext: { vao } } = this.renderer;
 
 		if ( this.buffer ) gl.deleteBuffer( this.buffer );

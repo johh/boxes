@@ -104,6 +104,7 @@ export default class Renderer {
 			frameBuffer.use();
 		} else {
 			this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, null );
+			this.gl.viewport( 0, 0, this.width, this.height );
 		}
 
 		material.use( this.gl );

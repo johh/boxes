@@ -98,14 +98,14 @@ export default class Renderable extends TransformNode {
 			break;
 		}
 
-		this.material.use( gl );
+		const programAvailable = this.material.use( gl );
 
 		// skip drawing on first frame of visibility.
 		// this is a workaround to avoid a "FOUC" where uniforms aren't committed yet.
 
-		if ( !this.skipFrame ) {
+		if ( !this.skipFrame && programAvailable ) {
 			this.geometry.draw( renderer, this.material );
-		} else {
+		} else if ( programAvailable ) {
 			this.skipFrame = false;
 		}
 

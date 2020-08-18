@@ -11,6 +11,7 @@ export default class ShaderPass extends Material {
 			uniforms: {
 				u_fTime: float.create(),
 			},
+			deferCompilation: false,
 		});
 	}
 }

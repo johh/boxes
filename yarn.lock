@@ -978,6 +978,11 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@downpourdigital/scheduler@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@downpourdigital/scheduler/-/scheduler-0.0.10.tgz#36cc84616684c7d8ea4eb67a5ea333c859a81b4b"
+  integrity sha512-Yt0v5a4uhtFU/AvdSZoFk00gOf01m/P8vddjfaVDELWJWVfBOUFW3X8F+YUT9uLylH/ynZE8vekl9e3EhVv6aw==
+
 "@rollup/pluginutils@^3.0.8":
   version "3.0.10"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-3.0.10.tgz#a659b9025920378494cd8f8c59fbf9b3a50d5f12"

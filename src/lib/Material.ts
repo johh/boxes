@@ -2,6 +2,7 @@
 import {
 	vec2, vec3, vec4, mat4, mat3, mat2,
 } from 'gl-matrix';
+import scheduler from '@downpourdigital/scheduler';
 
 import { UniformValue, InternalUniformValue } from './UniformValue';
 import {
@@ -15,6 +16,7 @@ export interface MaterialProps {
 	vertexShader?: string;
 	fragmentShader?: string;
 	uniforms?: UniformList;
+	deferCompilation?: boolean;
 }
 
 
@@ -126,6 +128,8 @@ export default class Material {
 	private attributeLocations = new Map<string, number>();
 	private queuedUniforms: UniformList = {};
 	private textures: Texture[] = [];
+	private deferCompilation: boolean;
+	private compilationStarted: boolean;
 	public readonly isMaterial = true;
 
 
@@ -134,10 +138,12 @@ export default class Material {
 			vertexShader = defaultVertShader,
 			fragmentShader = defaultFragShader,
 			uniforms,
+			deferCompilation = true,
 		} = props;
 
 		this.vertexSrc = vertexShader;
 		this.fragmentSrc = fragmentShader;
+		this.deferCompilation = deferCompilation;
 
 		if ( uniforms ) Object.assign( this.queuedUniforms, uniforms );
 	}
@@ -244,12 +250,23 @@ export default class Material {
 	}
 
 
-	public use( gl: WebGLRenderingContext ): void {
+	public use( gl: WebGLRenderingContext ): boolean {
 		this.gl = gl;
 
-		gl.useProgram( this.compile() );
-		this.commitUniforms();
-		this.bindTextures();
+		if ( this.program || !this.deferCompilation ) {
+			gl.useProgram( this.compile() );
+			this.commitUniforms();
+			this.bindTextures();
+
+			return true;
+		}
+
+		if ( this.deferCompilation && !this.compilationStarted ) {
+			this.compilationStarted = true;
+			scheduler.scheduleDeferred( () => this.compile() );
+		}
+
+		return false;
 	}
 
 

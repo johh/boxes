@@ -155,6 +155,24 @@ export default class Framebuffer implements Texture {
 	}
 
 
+	public clearColor(): void {
+		this.use();
+		this.gl.clear( this.gl.COLOR_BUFFER_BIT );
+	}
+
+
+	public clearStencil(): void {
+		this.use();
+		this.gl.clear( this.gl.STENCIL_BUFFER_BIT );
+	}
+
+
+	public clearDepth(): void {
+		this.use();
+		this.gl.clear( this.gl.DEPTH_BUFFER_BIT );
+	}
+
+
 	public delete(): void {
 		this.gl.deleteFramebuffer( this.fbo );
 		this.gl.deleteTexture( this.texture );

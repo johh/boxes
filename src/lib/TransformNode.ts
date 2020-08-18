@@ -2,8 +2,8 @@ import { vec3, mat4, quat } from 'gl-matrix';
 import Traversable, { TraversableProps } from './Traversable';
 
 
-export interface TransformNodeProps extends TraversableProps {
-	onBeforeTransform?: ( ref: TransformNode ) => void;
+export interface TransformNodeProps<T> extends TraversableProps<T> {
+	onBeforeTransform?: ( ref: T ) => void;
 }
 
 
@@ -19,7 +19,7 @@ export default class TransformNode extends Traversable {
 	private quatRotation = quat.create();
 
 
-	constructor( props: TransformNodeProps = {}) {
+	constructor( props: TransformNodeProps<TransformNode> = {}) {
 		super( props );
 
 		const {

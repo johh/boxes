@@ -11,7 +11,7 @@ import { Renderer } from '../boxes';
 type BlendType = 'normal' | 'additive';
 
 
-export interface RenderableProps extends TransformNodeProps {
+export interface RenderableProps extends TransformNodeProps<Renderable> {
 	geometry: BufferGeometry;
 	material: Material;
 	depthTest?: boolean;

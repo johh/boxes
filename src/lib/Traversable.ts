@@ -1,7 +1,7 @@
-export interface TraversableProps {
+export interface TraversableProps<T> {
 	visible?: boolean;
 	maskOnly?: boolean;
-	onBeforeRender?: ( ref: Traversable ) => void;
+	onBeforeRender?: ( ref: T ) => void;
 }
 
 
@@ -14,7 +14,7 @@ export default class Traversable {
 	public onBeforeRender: ( ref: Traversable ) => void;
 
 
-	constructor( props: TraversableProps = {}) {
+	constructor( props: TraversableProps<Traversable> = {}) {
 		const {
 			visible = true,
 			maskOnly = false,

@@ -19,6 +19,7 @@ export interface RendererPops {
 	clearColor?: Color;
 	autoClear?: boolean;
 	cullFaces?: boolean;
+	antialias?: boolean;
 }
 
 
@@ -47,9 +48,14 @@ export default class Renderer {
 			clearColor = [0, 0, 0, 1] as Color,
 			autoClear = true,
 			cullFaces = true,
+			antialias = false,
 		} = props;
 
-		this.gl = canvas.getContext( 'webgl', { alpha: transparency, stencil: true });
+		this.gl = canvas.getContext( 'webgl', {
+			alpha: transparency,
+			stencil: true,
+			antialias,
+		});
 		this.ext = {
 			vao: this.gl.getExtension( 'OES_vertex_array_object' ),
 			standardDerivatives: this.gl.getExtension( 'OES_standard_derivatives' ),

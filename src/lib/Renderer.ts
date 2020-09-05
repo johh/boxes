@@ -29,6 +29,7 @@ export default class Renderer {
 		vao: OES_vertex_array_object;
 		standardDerivatives: OES_standard_derivatives;
 		instancedArrays: ANGLE_instanced_arrays;
+		info: WEBGL_debug_renderer_info;
 	};
 
 	public canvas: HTMLCanvasElement;
@@ -60,6 +61,7 @@ export default class Renderer {
 			vao: this.gl.getExtension( 'OES_vertex_array_object' ),
 			standardDerivatives: this.gl.getExtension( 'OES_standard_derivatives' ),
 			instancedArrays: this.gl.getExtension( 'ANGLE_instanced_arrays' ),
+			info: this.gl.getExtension( 'WEBGL_debug_renderer_info' ),
 		};
 
 		this.clearColor = clearColor;

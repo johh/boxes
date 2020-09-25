@@ -2,7 +2,7 @@
 import {
 	vec2, vec3, vec4, mat4, mat3, mat2,
 } from 'gl-matrix';
-import scheduler from '@downpourdigital/scheduler';
+import { defer } from '@downpourdigital/scheduler';
 
 import { UniformValue, InternalUniformValue } from './UniformValue';
 import {
@@ -263,7 +263,7 @@ export default class Material {
 
 		if ( this.deferCompilation && !this.compilationStarted ) {
 			this.compilationStarted = true;
-			scheduler.scheduleDeferred( () => this.compile() );
+			defer( () => this.compile(), 100 );
 		}
 
 		return false;

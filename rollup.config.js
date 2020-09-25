@@ -29,6 +29,11 @@ export default {
 			},
 		}),
 		typescript({
+			tsconfigOverride: {
+				compilerOptions: {
+					module: 'esnext',
+				},
+			},
 			transformers: [( service ) => ({
 				before: [
 					propertiesRenameTransformer(

@@ -1,6 +1,6 @@
 {
 	"name": "@downpourdigital/boxes",
-	"version": "0.4.2",
+	"version": "0.5.0",
 	"description": "Babbies first WebGL library",
 	"main": "dist/cjs/boxes.js",
 	"module": "dist/esm/boxes.js",

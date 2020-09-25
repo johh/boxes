@@ -11,7 +11,7 @@ import fastPointInPolygon from '../math/fastPointInPolygon';
 const mouse = vec2.create();
 
 
-export interface HitRegionPolygonProps extends TraversableProps {
+export interface HitRegionPolygonProps extends TraversableProps<HitRegionPolygon> {
 	verts?: number[];
 }
 

@@ -1,6 +1,6 @@
+import type Renderer from '../Renderer';
 import { TriangleDrawMode } from '../Enums';
 import Material from '../Material';
-import { Renderer } from '../../boxes'; // avoid dependency cycle
 import InstancedAttribute from './InstancedAttribute';
 
 

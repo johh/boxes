@@ -1,8 +1,7 @@
 import { mat4, vec2 } from 'gl-matrix';
 
+import type Scene from '../Scene';
 import Traversable from '../Traversable';
-// eslint-disable-next-line import/no-cycle
-import Scene from '../Scene';
 
 
 export default class GenericHitRegion extends Traversable {

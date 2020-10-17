@@ -1,11 +1,9 @@
 /* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/camelcase */
 
+import type Framebuffer from './post/Framebuffer';
 import Scene from './Scene';
 import BufferGeometry from './geometry/BufferGeometry';
 import Material from './Material';
-// eslint-disable-next-line import/no-cycle
-import Framebuffer from './post/Framebuffer';
 
 
 type Color = [number, number, number, number];

@@ -1,11 +1,10 @@
 import { mat4 } from 'gl-matrix';
 
+import type GenericHitRegion from './hitRegion/GenericHitRegion';
 import Traversable from './Traversable';
 import TransformNode from './TransformNode';
 import Renderable from './Renderable';
 import UniformProivder from './UniformProvider';
-// eslint-disable-next-line import/no-cycle
-import GenericHitRegion from './hitRegion/GenericHitRegion';
 import { Camera } from './camera/GenericCamera';
 import { Renderer } from '../boxes';
 

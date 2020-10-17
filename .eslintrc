@@ -14,7 +14,7 @@
 		"sourceType": "module"
 	},
 	"plugins": [
-		"@typescript-eslint/eslint-plugin",
+		"@typescript-eslint/eslint-plugin"
 	],
 	"overrides": [
 		{
@@ -211,6 +211,6 @@
 				"named": "never"
 			}
 		],
-		"spaced-comment": "error",
+		"spaced-comment": "error"
 	}
 }

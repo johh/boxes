@@ -6,6 +6,6 @@ tslint.json
 .clang-format
 .nvmrc
 .eslintignore
-.eslintrc.js
+.eslintrc
 yarn.lock
 yarn-error.log

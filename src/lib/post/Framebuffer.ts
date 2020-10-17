@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-cycle
 import Renderer from '../Renderer';
-import { Texture } from '../texture/GenericTexture';
+import { Texture } from '../texture/TextureTypes';
 
 
 export interface FramebufferProps {
@@ -23,6 +23,7 @@ export default class Framebuffer implements Texture {
 	public width: number;
 	public readonly isFramebuffer = true;
 	public readonly isTexture = true;
+	public readonly isCubemap = false;
 
 
 	constructor( props: FramebufferProps ) {

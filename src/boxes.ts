@@ -27,6 +27,8 @@ export { default as HitRegionPolygon } from './lib/hitRegion/HitRegionPolygon';
 
 export { default as ImageTexture } from './lib/texture/ImageTexture';
 export { default as GenericTexture } from './lib/texture/GenericTexture';
+export { default as ImageCubemap } from './lib/texture/ImageCubemap';
+export { default as GenericCubemap } from './lib/texture/GenericCubemap';
 
 export { int, float };
 export {

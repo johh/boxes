@@ -1,42 +1,21 @@
 /* eslint-disable indent */
-type TextureFormat =
-	WebGLRenderingContext['RGB'] |
-	WebGLRenderingContext['RGBA'] |
-	WebGLRenderingContext['ALPHA'] |
-	WebGLRenderingContext['LUMINANCE'] |
-	WebGLRenderingContext['LUMINANCE_ALPHA'];
+
+import type {
+	SharedTextureProps,
+	Texture,
+	TextureFormat,
+	TextureType,
+	TextureWrapProps,
+	WrappingType,
+} from './TextureTypes';
 
 
-type TextureType =
-	WebGLRenderingContext['UNSIGNED_BYTE'] |
-	WebGLRenderingContext['UNSIGNED_SHORT_5_6_5'] |
-	WebGLRenderingContext['UNSIGNED_SHORT_4_4_4_4'] |
-	WebGLRenderingContext['UNSIGNED_SHORT_5_5_5_1'];
-
-
-type WrappingType =
-	WebGLRenderingContext['CLAMP_TO_EDGE'] |
-	WebGLRenderingContext['REPEAT'] |
-	WebGLRenderingContext['MIRRORED_REPEAT'];
-
-
-export interface GenericTextureProps {
-	format?: TextureFormat;
-	type?: TextureType;
-	mipmaps?: boolean;
-	wrapS?: WrappingType;
-	wrapT?: WrappingType;
+export interface GenericTextureProps extends SharedTextureProps, TextureWrapProps {
 	initial?: {
 		data: Uint8Array;
 		width?: number;
 		height?: number;
 	};
-}
-
-
-export interface Texture {
-	isTexture: true;
-	prepare: ( gl: WebGLRenderingContext ) => WebGLTexture;
 }
 
 
@@ -54,6 +33,7 @@ export default class GenericTexture implements Texture {
 	private initialHeight: number;
 	protected needsUpdate = false;
 	public readonly isTexture = true;
+	public readonly isCubemap = false;
 
 
 	constructor( props: GenericTextureProps = {}) {

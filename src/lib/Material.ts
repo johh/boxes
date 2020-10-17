@@ -9,7 +9,7 @@ import {
 	vertexShader as defaultVertShader,
 	fragmentShader as defaultFragShader,
 } from './defaultShaders';
-import { Texture } from './texture/GenericTexture';
+import { Texture } from './texture/TextureTypes';
 
 
 export interface MaterialProps {
@@ -244,7 +244,11 @@ export default class Material {
 
 			if ( texture !== null ) {
 				const textureLoc = texture.prepare( gl );
-				gl.bindTexture( gl.TEXTURE_2D, textureLoc );
+				if ( texture.isCubemap ) {
+					gl.bindTexture( gl.TEXTURE_CUBE_MAP, textureLoc );
+				} else {
+					gl.bindTexture( gl.TEXTURE_2D, textureLoc );
+				}
 			}
 		});
 	}

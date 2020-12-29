@@ -55,7 +55,7 @@ export default class GenericCubemap implements Texture {
 	private type: TextureType;
 	private mipmaps: boolean;
 	private minFilter: MinFilterType;
-	private textureData: Partial<CubeOf<TexImageSource>> = {};
+	private textureData = new Map<number, Partial<CubeOf<TexImageSource>>>();
 	private initialWidth: number;
 	private initalData: CubeOf<Uint8Array>;
 	protected needsUpdate = false;
@@ -130,7 +130,7 @@ export default class GenericCubemap implements Texture {
 
 		if ( this.needsUpdate ) {
 			this.needsUpdate = false;
-			this.update( this.textureData );
+			this.update();
 
 			// TODO: only update faces that have changed
 		}
@@ -139,40 +139,41 @@ export default class GenericCubemap implements Texture {
 	}
 
 
-	private update( data: Partial<CubeOf<TexImageSource>> ): void {
-		const {
-			px, nx, py, ny, pz, nz,
-		} = this.textureData;
-		if ( px && nx && py && ny && pz && nz ) {
-			const { gl } = this;
+	protected update(): void {
+		const { gl } = this;
+		this.textureData.forEach( ( data, level ) => {
+			const {
+				px, nx, py, ny, pz, nz,
+			} = data;
 
-			gl.bindTexture( gl.TEXTURE_CUBE_MAP, this.texture );
-			faces.forEach( ( target, key ) => {
-				if ( data[key]) {
-					gl.texImage2D(
-						target,
-						0,
-						this.format,
-						this.format,
-						this.type,
-						data[key],
-					);
+			if ( px && nx && py && ny && pz && nz ) {
+				faces.forEach( ( target, key ) => {
+					if ( data[key]) {
+						gl.texImage2D(
+							target,
+							level,
+							this.format,
+							this.format,
+							this.type,
+							data[key],
+						);
+					}
+				});
+				if ( this.mipmaps && level === 0 ) {
+					gl.generateMipmap( gl.TEXTURE_CUBE_MAP );
 				}
-			});
-
-			if ( this.mipmaps ) {
-				gl.generateMipmap( gl.TEXTURE_CUBE_MAP );
+				this.textureData.delete( level );
 			}
+		});
 
-			gl.texParameteri(
-				gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter,
-			);
-		}
+		gl.texParameteri(
+			gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter,
+		);
 	}
 
 
-	protected queueUpdate( data: Partial<CubeOf<TexImageSource>> ): void {
-		this.textureData = Object.assign( this.textureData, data );
+	protected queueUpdate( data: Partial<CubeOf<TexImageSource>>, level = 0 ): void {
+		this.textureData.set( level, Object.assign( this.textureData.get( level ) || {}, data ) );
 		this.needsUpdate = true;
 	}
 

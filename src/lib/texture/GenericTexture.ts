@@ -28,11 +28,11 @@ export default class GenericTexture implements Texture {
 	private mipmaps: boolean;
 	private wrapS: WrappingType;
 	private wrapT: WrappingType;
-	private textureData: TexImageSource;
 	private minFilter: MinFilterType;
 	private initalData: Uint8Array;
 	private initialWidth: number;
 	private initialHeight: number;
+	private textureData = new Map<number, TexImageSource>();
 	protected needsUpdate = false;
 	public readonly isTexture = true;
 	public readonly isCubemap = false;
@@ -114,32 +114,35 @@ export default class GenericTexture implements Texture {
 
 		if ( this.needsUpdate ) {
 			this.needsUpdate = false;
-			this.update( this.textureData );
+			this.update();
 		}
 
 		return this.texture;
 	}
 
 
-	protected queueUpdate( data: TexImageSource ): void {
-		this.textureData = data;
+	protected queueUpdate( data: TexImageSource, level = 0 ): void {
+		this.textureData.set( level, data );
 		this.needsUpdate = true;
 	}
 
 
-	public update( data: TexImageSource ): void {
+	protected update(): void {
 		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
-		this.gl.texImage2D(
-			this.gl.TEXTURE_2D,
-			0,
-			this.format,
-			this.format,
-			this.type,
-			data,
-		);
-		if ( this.mipmaps ) {
-			this.gl.generateMipmap( this.gl.TEXTURE_2D );
-		}
+		this.textureData.forEach( ( data, level ) => {
+			this.gl.texImage2D(
+				this.gl.TEXTURE_2D,
+				level,
+				this.format,
+				this.format,
+				this.type,
+				data,
+			);
+			if ( this.mipmaps && level === 0 ) {
+				this.gl.generateMipmap( this.gl.TEXTURE_2D );
+			}
+		});
+		this.textureData.clear();
 	}
 
 

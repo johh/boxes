@@ -19,10 +19,20 @@ export type WrappingType =
 	WebGLRenderingContext['MIRRORED_REPEAT'];
 
 
+export type MinFilterType =
+	WebGLRenderingContext['NEAREST'] |
+	WebGLRenderingContext['LINEAR'] |
+	WebGLRenderingContext['NEAREST_MIPMAP_NEAREST'] |
+	WebGLRenderingContext['LINEAR_MIPMAP_NEAREST'] |
+	WebGLRenderingContext['NEAREST_MIPMAP_LINEAR'] |
+	WebGLRenderingContext['LINEAR_MIPMAP_LINEAR'];
+
+
 export interface SharedTextureProps {
 	format?: TextureFormat;
 	type?: TextureType;
 	mipmaps?: boolean;
+	minFilter?: MinFilterType;
 }
 
 

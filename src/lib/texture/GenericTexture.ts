@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 
 import type {
+	MinFilterType,
 	SharedTextureProps,
 	Texture,
 	TextureFormat,
@@ -28,6 +29,7 @@ export default class GenericTexture implements Texture {
 	private wrapS: WrappingType;
 	private wrapT: WrappingType;
 	private textureData: TexImageSource;
+	private minFilter: MinFilterType;
 	private initalData: Uint8Array;
 	private initialWidth: number;
 	private initialHeight: number;
@@ -43,6 +45,7 @@ export default class GenericTexture implements Texture {
 			mipmaps = false,
 			wrapS = WebGLRenderingContext.CLAMP_TO_EDGE,
 			wrapT = WebGLRenderingContext.CLAMP_TO_EDGE,
+			minFilter,
 			initial: {
 				data,
 				width = 1,
@@ -57,6 +60,10 @@ export default class GenericTexture implements Texture {
 		this.wrapT = wrapT;
 		this.initialWidth = width;
 		this.initialHeight = height;
+
+		this.minFilter = minFilter || ( mipmaps
+			? WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+			: WebGLRenderingContext.LINEAR );
 
 		if ( data ) {
 			this.initalData = data;
@@ -100,10 +107,9 @@ export default class GenericTexture implements Texture {
 
 			if ( this.mipmaps ) {
 				gl.generateMipmap( gl.TEXTURE_2D );
-				gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
-			} else {
-				gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
 			}
+
+			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.minFilter );
 		}
 
 		if ( this.needsUpdate ) {

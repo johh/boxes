@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 
 import type {
+	MinFilterType,
 	SharedTextureProps,
 	Texture,
 	TextureFormat,
@@ -53,6 +54,7 @@ export default class GenericCubemap implements Texture {
 	private format: TextureFormat;
 	private type: TextureType;
 	private mipmaps: boolean;
+	private minFilter: MinFilterType;
 	private textureData: Partial<CubeOf<TexImageSource>> = {};
 	private initialWidth: number;
 	private initalData: CubeOf<Uint8Array>;
@@ -66,6 +68,7 @@ export default class GenericCubemap implements Texture {
 			format = WebGLRenderingContext.RGBA,
 			type = WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = true,
+			minFilter,
 			initial: {
 				data,
 				width = 1,
@@ -76,6 +79,10 @@ export default class GenericCubemap implements Texture {
 		this.type = type;
 		this.mipmaps = mipmaps;
 		this.initialWidth = width;
+
+		this.minFilter = minFilter || ( mipmaps
+			? WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+			: WebGLRenderingContext.LINEAR );
 
 		if ( data ) {
 			this.initalData = data;
@@ -152,12 +159,14 @@ export default class GenericCubemap implements Texture {
 					);
 				}
 			});
+
 			if ( this.mipmaps ) {
 				gl.generateMipmap( gl.TEXTURE_CUBE_MAP );
-				gl.texParameteri(
-					gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR,
-				);
 			}
+
+			gl.texParameteri(
+				gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter,
+			);
 		}
 	}
 

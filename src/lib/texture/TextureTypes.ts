@@ -47,3 +47,13 @@ export interface Texture {
 	isCubemap: boolean;
 	prepare: ( gl: WebGLRenderingContext ) => WebGLTexture;
 }
+
+
+export type RawTextureData = {
+	data: Float32Array | Uint8Array | Uint16Array;
+	width: number;
+	height: number;
+};
+
+
+export type TextureData = TexImageSource | RawTextureData;

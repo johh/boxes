@@ -1,9 +1,11 @@
-/* eslint-disable indent */
+/* eslint-disable @typescript-eslint/indent  */
 
+import arrayFromTextureProps from '../utils/ArrayFromTextureProps';
 import type {
 	MinFilterType,
 	SharedTextureProps,
 	Texture,
+	TextureData,
 	TextureFormat,
 	TextureType,
 	TextureWrapProps,
@@ -29,10 +31,10 @@ export default class GenericTexture implements Texture {
 	private wrapS: WrappingType;
 	private wrapT: WrappingType;
 	private minFilter: MinFilterType;
-	private initalData: Uint8Array;
+	private initalData: Uint8Array | Uint16Array | Float32Array;
 	private initialWidth: number;
 	private initialHeight: number;
-	private textureData = new Map<number, TexImageSource>();
+	private textureData = new Map<number, TextureData>();
 	protected needsUpdate = false;
 	public readonly isTexture = true;
 	public readonly isCubemap = false;
@@ -68,19 +70,7 @@ export default class GenericTexture implements Texture {
 		if ( data ) {
 			this.initalData = data;
 		} else {
-			switch ( this.format ) {
-			case WebGLRenderingContext.RGBA:
-				this.initalData = new Uint8Array([0, 0, 0, 255]);
-				break;
-			case WebGLRenderingContext.RGB:
-				this.initalData = new Uint8Array([0, 0, 0]);
-				break;
-			case WebGLRenderingContext.LUMINANCE_ALPHA:
-				this.initalData = new Uint8Array([0, 0]);
-				break;
-			default:
-				this.initalData = new Uint8Array([0]);
-			}
+			this.initalData = arrayFromTextureProps( this.type, this.format );
 		}
 	}
 
@@ -121,7 +111,7 @@ export default class GenericTexture implements Texture {
 	}
 
 
-	protected queueUpdate( data: TexImageSource, level = 0 ): void {
+	protected queueUpdate( data: TextureData, level = 0 ): void {
 		this.textureData.set( level, data );
 		this.needsUpdate = true;
 	}
@@ -130,14 +120,30 @@ export default class GenericTexture implements Texture {
 	protected update(): void {
 		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
 		this.textureData.forEach( ( data, level ) => {
-			this.gl.texImage2D(
-				this.gl.TEXTURE_2D,
-				level,
-				this.format,
-				this.format,
-				this.type,
-				data,
-			);
+			if ( 'data' in data ) {
+				const { width, height, data: textureData } = data;
+
+				this.gl.texImage2D(
+					this.gl.TEXTURE_2D,
+					level,
+					this.format,
+					width,
+					height,
+					0,
+					this.format,
+					this.type,
+					textureData,
+				);
+			} else {
+				this.gl.texImage2D(
+					this.gl.TEXTURE_2D,
+					level,
+					this.format,
+					this.format,
+					this.type,
+					data as TexImageSource,
+				);
+			}
 			if ( this.mipmaps && level === 0 ) {
 				this.gl.generateMipmap( this.gl.TEXTURE_2D );
 			}

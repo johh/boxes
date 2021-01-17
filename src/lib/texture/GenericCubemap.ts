@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/indent */
 
+import arrayFromTextureProps from '../utils/ArrayFromTextureProps';
 import type {
 	MinFilterType,
+	RawTextureData,
 	SharedTextureProps,
 	Texture,
+	TextureData,
 	TextureFormat,
 	TextureType,
 } from './TextureTypes';
@@ -43,7 +46,7 @@ const faces = new Map<keyof CubeOf<number>, number>([
 
 export interface GenericCubemapProps extends SharedTextureProps {
 	initial?: {
-		data: CubeOf<Uint8Array>;
+		data: CubeOf<Uint8Array | Uint16Array | Float32Array>;
 		width?: number;
 	};
 }
@@ -55,9 +58,9 @@ export default class GenericCubemap implements Texture {
 	private type: TextureType;
 	private mipmaps: boolean;
 	private minFilter: MinFilterType;
-	private textureData = new Map<number, Partial<CubeOf<TexImageSource>>>();
+	private textureData = new Map<number, Partial<CubeOf<TextureData>>>();
 	private initialWidth: number;
-	private initalData: CubeOf<Uint8Array>;
+	private initalData: CubeOf<Uint8Array | Uint16Array | Float32Array>;
 	protected needsUpdate = false;
 	public readonly isTexture = true;
 	public readonly isCubemap = true;
@@ -87,19 +90,7 @@ export default class GenericCubemap implements Texture {
 		if ( data ) {
 			this.initalData = data;
 		} else {
-			switch ( this.format ) {
-				case WebGLRenderingContext.RGBA:
-					this.initalData = makeCubeOf( new Uint8Array([0, 0, 0, 255]) );
-					break;
-				case WebGLRenderingContext.RGB:
-					this.initalData = makeCubeOf( new Uint8Array([0, 0, 0]) );
-					break;
-				case WebGLRenderingContext.LUMINANCE_ALPHA:
-					this.initalData = makeCubeOf( new Uint8Array([0, 0]) );
-					break;
-				default:
-					this.initalData = makeCubeOf( new Uint8Array([0]) );
-			}
+			this.initalData = makeCubeOf( arrayFromTextureProps( this.type, this.format ) );
 		}
 	}
 
@@ -149,14 +140,32 @@ export default class GenericCubemap implements Texture {
 			if ( px && nx && py && ny && pz && nz ) {
 				faces.forEach( ( target, key ) => {
 					if ( data[key]) {
-						gl.texImage2D(
-							target,
-							level,
-							this.format,
-							this.format,
-							this.type,
-							data[key],
-						);
+						if ( 'data' in data[key]) {
+							const {
+								width, height, data: textureData,
+							} = data[key] as RawTextureData;
+
+							this.gl.texImage2D(
+								target,
+								level,
+								this.format,
+								width,
+								height,
+								0,
+								this.format,
+								this.type,
+								textureData,
+							);
+						} else {
+							this.gl.texImage2D(
+								target,
+								level,
+								this.format,
+								this.format,
+								this.type,
+								data[key] as TexImageSource,
+							);
+						}
 					}
 				});
 				if ( this.mipmaps && level === 0 ) {
@@ -172,7 +181,7 @@ export default class GenericCubemap implements Texture {
 	}
 
 
-	protected queueUpdate( data: Partial<CubeOf<TexImageSource>>, level = 0 ): void {
+	protected queueUpdate( data: Partial<CubeOf<TextureData>>, level = 0 ): void {
 		this.textureData.set( level, Object.assign( this.textureData.get( level ) || {}, data ) );
 		this.needsUpdate = true;
 	}

@@ -57,6 +57,7 @@ export default class GenericCubemap implements Texture {
 	private format: TextureFormat;
 	private type: TextureType;
 	private mipmaps: boolean;
+	private skipMipmapGeneration: boolean;
 	private minFilter: MinFilterType;
 	private textureData = new Map<number, Partial<CubeOf<TextureData>>>();
 	private initialWidth: number;
@@ -71,6 +72,7 @@ export default class GenericCubemap implements Texture {
 			format = WebGLRenderingContext.RGBA,
 			type = WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = true,
+			skipMipmapGeneration = false,
 			minFilter,
 			initial: {
 				data,
@@ -81,6 +83,7 @@ export default class GenericCubemap implements Texture {
 		this.format = format;
 		this.type = type;
 		this.mipmaps = mipmaps;
+		this.skipMipmapGeneration = skipMipmapGeneration;
 		this.initialWidth = width;
 
 		this.minFilter = minFilter || ( mipmaps
@@ -168,7 +171,7 @@ export default class GenericCubemap implements Texture {
 						}
 					}
 				});
-				if ( this.mipmaps && level === 0 ) {
+				if ( !this.skipMipmapGeneration && this.mipmaps && level === 0 ) {
 					gl.generateMipmap( gl.TEXTURE_CUBE_MAP );
 				}
 				this.textureData.delete( level );

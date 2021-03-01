@@ -33,6 +33,7 @@ export interface SharedTextureProps {
 	type?: TextureType;
 	mipmaps?: boolean;
 	minFilter?: MinFilterType;
+	skipMipmapGeneration?: boolean;
 }
 
 

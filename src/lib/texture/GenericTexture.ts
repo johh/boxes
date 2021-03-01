@@ -28,6 +28,7 @@ export default class GenericTexture implements Texture {
 	private format: TextureFormat;
 	private type: TextureType;
 	private mipmaps: boolean;
+	private skipMipmapGeneration: boolean;
 	private wrapS: WrappingType;
 	private wrapT: WrappingType;
 	private minFilter: MinFilterType;
@@ -45,6 +46,7 @@ export default class GenericTexture implements Texture {
 			format = WebGLRenderingContext.RGBA,
 			type = WebGLRenderingContext.UNSIGNED_BYTE,
 			mipmaps = false,
+			skipMipmapGeneration = false,
 			wrapS = WebGLRenderingContext.CLAMP_TO_EDGE,
 			wrapT = WebGLRenderingContext.CLAMP_TO_EDGE,
 			minFilter,
@@ -58,6 +60,7 @@ export default class GenericTexture implements Texture {
 		this.format = format;
 		this.type = type;
 		this.mipmaps = mipmaps;
+		this.skipMipmapGeneration = skipMipmapGeneration;
 		this.wrapS = wrapS;
 		this.wrapT = wrapT;
 		this.initialWidth = width;
@@ -95,7 +98,7 @@ export default class GenericTexture implements Texture {
 			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS );
 			gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT );
 
-			if ( this.mipmaps ) {
+			if ( !this.skipMipmapGeneration && this.mipmaps ) {
 				gl.generateMipmap( gl.TEXTURE_2D );
 			}
 
@@ -144,7 +147,7 @@ export default class GenericTexture implements Texture {
 					data as TexImageSource,
 				);
 			}
-			if ( this.mipmaps && level === 0 ) {
+			if ( !this.skipMipmapGeneration && this.mipmaps && level === 0 ) {
 				this.gl.generateMipmap( this.gl.TEXTURE_2D );
 			}
 		});

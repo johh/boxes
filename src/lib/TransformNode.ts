@@ -9,6 +9,7 @@ export interface TransformNodeProps<T> extends TraversableProps<T> {
 
 export default class TransformNode extends Traversable {
 	public readonly isTransformNode = true;
+	public readonly quatRotation = quat.create();
 	public onBeforeTransform: ( ref: TransformNode ) => void;
 	public origin = vec3.create();
 	public translation = vec3.create();
@@ -16,7 +17,6 @@ export default class TransformNode extends Traversable {
 	public rotation = vec3.create();
 	public localMatrix = mat4.create();
 	public worldMatrix = mat4.create();
-	private quatRotation = quat.create();
 
 
 	constructor( props: TransformNodeProps<TransformNode> = {}) {

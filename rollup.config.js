@@ -8,7 +8,8 @@ export default {
 
 	output: [
 		{
-			file: 'dist/esm/boxes.js',
+			dir: 'dist/esm',
+			preserveModules: true,
 			format: 'esm',
 		},
 		{
